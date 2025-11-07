@@ -1,19 +1,20 @@
-# script.py (v11-final: Robust + Global Isotonic + Domain Features)
+# script.py (v13: GroupKFold CatBoost + Global Isotonic + Safe Submission)
 
 import os
 import joblib
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import catboost as cb  # 언피클용
-from sklearn.isotonic import IsotonicRegression  # 언피클용
+import catboost as cb  # for unpickling
+from sklearn.isotonic import IsotonicRegression  # for unpickling
 import warnings
 
 warnings.filterwarnings('ignore')
 tqdm.pandas()
 
+
 # =======================
-# 1. 전처리 유틸 (1_Preprocess와 동일 + 방어 코드)
+# 1. 전처리 유틸
 # =======================
 
 def convert_age(val):
@@ -48,6 +49,12 @@ def seq_std(series: pd.Series) -> pd.Series:
 
 
 def masked_operation(cond_series, val_series, target_conds, operation='mean'):
+    """
+    cond_series: '1,2,1,...' 조건 시퀀스
+    val_series : 같은 길이 값 시퀀스 (RT 또는 정답 코드)
+    target_conds: 선택 조건 값(들)
+    operation: 'mean' / 'std' / 'rate' / 'rate_yn'
+    """
     cond_df = cond_series.fillna("").str.split(",", expand=True).replace("", np.nan).to_numpy(dtype=float)
     val_df = val_series.fillna("").str.split(",", expand=True).replace("", np.nan).to_numpy(dtype=float)
 
@@ -78,6 +85,7 @@ def masked_operation(cond_series, val_series, target_conds, operation='mean'):
 
 
 def seq_rate_A3(series, target_codes):
+    """A3-5: valid/invalid + correct/incorrect 조합코드 비율"""
     def calc(x):
         if not x:
             return np.nan
@@ -91,6 +99,7 @@ def seq_rate_A3(series, target_codes):
 
 
 def seq_rate_B1_B2(series, target_codes):
+    """B1-3, B2-3: change / non-change 조건 정확도"""
     def calc(x):
         if not x:
             return np.nan
@@ -104,6 +113,7 @@ def seq_rate_B1_B2(series, target_codes):
 
 
 def seq_rate_B4(series, target_codes):
+    """B4-1: Flanker congruent/incongruent 정확도"""
     def calc(x):
         if not x:
             return np.nan
@@ -117,6 +127,7 @@ def seq_rate_B4(series, target_codes):
 
 
 def seq_rate_simple(series):
+    """B3, B5, B6, B7, B8 등 1=정답, 2=오답"""
     def calc(x):
         if not x:
             return np.nan
@@ -129,12 +140,14 @@ def seq_rate_simple(series):
     return series.fillna("").progress_apply(calc)
 
 
-# ---------- 1차 Feature Engineering ----------
+# =======================
+# 1차 Feature Engineering (A/B)
+# =======================
 
 def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     print("Step 1 (A): Age, TestDate 파생...")
 
-    # 방어: Age / TestDate 없으면 더미 생성
+    # 방어: 필수 컬럼 없으면 더미 생성
     if "Age" not in df.columns:
         df["Age"] = np.nan
     if "TestDate" not in df.columns:
@@ -148,7 +161,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats = pd.DataFrame(index=df.index)
     print("Step 2 (A): A1~A5 features (도메인 피처)...")
 
-    # A1
+    # A1 (속도 예측)
     feats["A1_rt_mean"] = seq_mean(df["A1-4"])
     feats["A1_rt_std"] = seq_std(df["A1-4"])
     feats["A1_rt_left"] = masked_operation(df["A1-1"], df["A1-4"], 1, 'mean')
@@ -160,7 +173,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats["A1_acc_norm"] = masked_operation(df["A1-2"], df["A1-3"], 2, 'rate')
     feats["A1_acc_fast"] = masked_operation(df["A1-2"], df["A1-3"], 3, 'rate')
 
-    # A2
+    # A2 (정지 예측)
     feats["A2_rt_mean"] = seq_mean(df["A2-4"])
     feats["A2_rt_std"] = seq_std(df["A2-4"])
     feats["A2_rt_slow_c1"] = masked_operation(df["A2-1"], df["A2-4"], 1, 'mean')
@@ -173,7 +186,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats["A2_acc_norm"] = masked_operation(df["A2-1"], df["A2-3"], 2, 'rate')
     feats["A2_acc_fast"] = masked_operation(df["A2-1"], df["A2-3"], 3, 'rate')
 
-    # A3
+    # A3 (주의 전환)
     feats["A3_valid_acc"] = seq_rate_A3(df["A3-5"], ['1', '2'])
     feats["A3_invalid_acc"] = seq_rate_A3(df["A3-5"], ['3', '4'])
     feats["A3_rt_mean"] = seq_mean(df["A3-7"])
@@ -183,7 +196,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats["A3_rt_left"] = masked_operation(df["A3-3"], df["A3-7"], 1, 'mean')
     feats["A3_rt_right"] = masked_operation(df["A3-3"], df["A3-7"], 2, 'mean')
 
-    # A4
+    # A4 (Stroop)
     feats["A4_rt_mean"] = seq_mean(df["A4-5"])
     feats["A4_rt_std"] = seq_std(df["A4-5"])
     feats["A4_rt_congruent"] = masked_operation(df["A4-1"], df["A4-5"], 1, 'mean')
@@ -191,7 +204,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats["A4_acc_congruent"] = masked_operation(df["A4-1"], df["A4-3"], 1, 'rate')
     feats["A4_acc_incongruent"] = masked_operation(df["A4-1"], df["A4-3"], 2, 'rate')
 
-    # A5
+    # A5 (변화 탐지)
     feats["A5_acc_nonchange"] = masked_operation(df["A5-1"], df["A5-2"], 1, 'rate')
     feats["A5_acc_pos_change"] = masked_operation(df["A5-1"], df["A5-2"], 2, 'rate')
     feats["A5_acc_color_change"] = masked_operation(df["A5-1"], df["A5-2"], 3, 'rate')
@@ -201,7 +214,7 @@ def preprocess_A(df: pd.DataFrame) -> pd.DataFrame:
     feats["A6_correct_count"] = df["A6-1"]
     feats["A7_correct_count"] = df["A7-1"]
 
-    # A8, A9
+    # A8, A9 (원래 컬럼명 유지)
     feats["A8-1"] = df["A8-1"]
     feats["A8-2"] = df["A8-2"]
     feats["A9-1"] = df["A9-1"]
@@ -239,6 +252,7 @@ def preprocess_B(df: pd.DataFrame) -> pd.DataFrame:
     feats = pd.DataFrame(index=df.index)
     print("Step 2 (B): B1~B10 features (도메인 피처)...")
 
+    # B1, B2
     feats["B1_task1_acc"] = seq_rate_simple(df["B1-1"])
     feats["B1_rt_mean"] = seq_mean(df["B1-2"])
     feats["B1_rt_std"] = seq_std(df["B1-2"])
@@ -251,23 +265,26 @@ def preprocess_B(df: pd.DataFrame) -> pd.DataFrame:
     feats["B2_change_acc"] = seq_rate_B1_B2(df["B2-3"], ['1', '2'])
     feats["B2_nonchange_acc"] = seq_rate_B1_B2(df["B2-3"], ['3', '4'])
 
+    # B3
     feats["B3_acc_rate"] = seq_rate_simple(df["B3-1"])
     feats["B3_rt_mean"] = seq_mean(df["B3-2"])
     feats["B3_rt_std"] = seq_std(df["B3-2"])
 
+    # B4
     feats["B4_congruent_acc"] = seq_rate_B4(df["B4-1"], ['1', '2'])
     feats["B4_incongruent_acc"] = seq_rate_B4(df["B4-1"], ['3', '4', '5', '6'])
     feats["B4_rt_mean"] = seq_mean(df["B4-2"])
     feats["B4_rt_std"] = seq_std(df["B4-2"])
 
+    # B5, B6, B7, B8
     feats["B5_acc_rate"] = seq_rate_simple(df["B5-1"])
     feats["B5_rt_mean"] = seq_mean(df["B5-2"])
     feats["B5_rt_std"] = seq_std(df["B5-2"])
-
     feats["B6_acc_rate"] = seq_rate_simple(df["B6"])
     feats["B7_acc_rate"] = seq_rate_simple(df["B7"])
     feats["B8_acc_rate"] = seq_rate_simple(df["B8"])
 
+    # B9, B10 (원래 컬럼명 유지)
     feats["B9-1"] = df["B9-1"]
     feats["B9-2"] = df["B9-2"]
     feats["B9-3"] = df["B9-3"]
@@ -295,7 +312,9 @@ def preprocess_B(df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([df, feats], axis=1).drop(columns=seq_cols, errors="ignore")
 
 
-# ---------- 2차 Feature Engineering ----------
+# =======================
+# 2차 Feature Engineering
+# =======================
 
 def _has(df, cols):
     return all(c in df.columns for c in cols)
@@ -347,6 +366,32 @@ def add_features_A(df: pd.DataFrame) -> pd.DataFrame:
         feats["A5_acc_cost_pos"] = feats["A5_acc_nonchange"] - feats["A5_acc_pos_change"]
     if _has(feats, ["A5_acc_nonchange", "A5_acc_color_change"]):
         feats["A5_acc_cost_color"] = feats["A5_acc_nonchange"] - feats["A5_acc_color_change"]
+    if _has(feats, ["A5_acc_nonchange", "A5_acc_shape_change"]):
+        feats["A5_acc_cost_shape"] = feats["A5_acc_nonchange"] - feats["A5_acc_shape_change"]
+
+    if _has(feats, ["A3_valid_acc", "A3_invalid_acc", "A4_acc_congruent", "A4_acc_incongruent"]):
+        feats["A_selective_attention_index"] = (
+            (feats["A3_valid_acc"] - feats["A3_invalid_acc"]).fillna(0) +
+            (feats["A4_acc_congruent"] - feats["A4_acc_incongruent"]).fillna(0)
+        )
+
+    wm_cols = [c for c in [
+        "A5_acc_nonchange", "A5_acc_pos_change",
+        "A5_acc_color_change", "A5_acc_shape_change"
+    ] if c in feats.columns]
+    if wm_cols:
+        wm_mat = feats[wm_cols].apply(pd.to_numeric, errors="coerce")
+        feats["A_working_memory_index"] = wm_mat.mean(axis=1)
+
+    cog_cols_A = [c for c in [
+        "A6_correct_count", "A7_correct_count",
+        "A8-1", "A8-2",
+        "A9-1", "A9-2", "A9-3", "A9-4", "A9-5"
+    ] if c in feats.columns]
+    if cog_cols_A:
+        cog_mat = feats[cog_cols_A].apply(pd.to_numeric, errors="coerce")
+        feats["A_cog_sum"] = cog_mat.sum(axis=1)
+        feats["A_cog_mean"] = cog_mat.mean(axis=1)
 
     parts = []
     if "A4_stroop_rt_cost" in feats:
@@ -359,6 +404,13 @@ def add_features_A(df: pd.DataFrame) -> pd.DataFrame:
         parts.append(0.20 * feats["A1_rt_cv"].fillna(0))
     if "A2_rt_cv" in feats:
         parts.append(0.10 * feats["A2_rt_cv"].fillna(0))
+    if "A5_acc_cost_pos" in feats:
+        parts.append(0.10 * feats["A5_acc_cost_pos"].fillna(0).clip(lower=0))
+    if "A5_acc_cost_color" in feats:
+        parts.append(0.10 * feats["A5_acc_cost_color"].fillna(0).clip(lower=0))
+    if "A5_acc_cost_shape" in feats:
+        parts.append(0.10 * feats["A5_acc_cost_shape"].fillna(0).clip(lower=0))
+
     if parts:
         feats["RiskScore"] = sum(parts)
 
@@ -397,6 +449,49 @@ def add_features_B(df: pd.DataFrame) -> pd.DataFrame:
     if _has(feats, ["B4_congruent_acc", "B4_incongruent_acc"]):
         feats["B4_flanker_acc_cost"] = feats["B4_congruent_acc"] - feats["B4_incongruent_acc"]
 
+    rt_cv_cols = [c for c in [
+        "B1_rt_cv", "B2_rt_cv", "B3_rt_cv", "B4_rt_cv", "B5_rt_cv"
+    ] if c in feats.columns]
+    if rt_cv_cols:
+        cv_mat = feats[rt_cv_cols].apply(pd.to_numeric, errors="coerce")
+        feats["B_visuomotor_variability"] = cv_mat.mean(axis=1)
+
+    acc_simple_cols = [c for c in [
+        "B3_acc_rate", "B5_acc_rate",
+        "B6_acc_rate", "B7_acc_rate", "B8_acc_rate"
+    ] if c in feats.columns]
+    if acc_simple_cols:
+        acc_mat = feats[acc_simple_cols].apply(pd.to_numeric, errors="coerce")
+        feats["B_reaction_overall"] = acc_mat.mean(axis=1)
+
+    exec_parts = []
+    if "B4_flanker_acc_cost" in feats:
+        exec_parts.append((1 - feats["B4_flanker_acc_cost"]).fillna(0))
+    for c in ["B1_acc_cost", "B2_acc_cost"]:
+        if c in feats:
+            exec_parts.append((1 - feats[c]).fillna(0))
+    if exec_parts:
+        exec_mat = pd.concat(exec_parts, axis=1)
+        feats["B_executive_control_index"] = exec_mat.mean(axis=1)
+
+    b9_cols = [c for c in ["B9-1", "B9-2", "B9-3", "B9-4", "B9-5"] if c in feats.columns]
+    if b9_cols:
+        b9_mat = feats[b9_cols].apply(pd.to_numeric, errors="coerce")
+        feats["B9_sum"] = b9_mat.sum(axis=1)
+        feats["B9_mean"] = b9_mat.mean(axis=1)
+
+    b10_cols = [c for c in ["B10-1", "B10-2", "B10-3", "B10-4", "B10-5", "B10-6"] if c in feats.columns]
+    if b10_cols:
+        b10_mat = feats[b10_cols].apply(pd.to_numeric, errors="coerce")
+        feats["B10_sum"] = b10_mat.sum(axis=1)
+        feats["B10_mean"] = b10_mat.mean(axis=1)
+
+    cog_cols_B = list(set(b9_cols + b10_cols))
+    if cog_cols_B:
+        cog_mat_B = feats[cog_cols_B].apply(pd.to_numeric, errors="coerce")
+        feats["B_cog_sum"] = cog_mat_B.sum(axis=1)
+        feats["B_cog_mean"] = cog_mat_B.mean(axis=1)
+
     parts = []
     for k in ["B4", "B5"]:
         cv_col = f"{k}_rt_cv"
@@ -423,7 +518,7 @@ def add_features_B(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # =======================
-# 2. 피처 정렬 (CatBoost용)
+# 3. 피처 정렬 (CatBoost용)
 # =======================
 
 CAT_FEATURES = ['Age', 'PrimaryKey']
@@ -495,7 +590,7 @@ def align_features_B(X_df: pd.DataFrame, cat_model) -> pd.DataFrame:
 
 
 # =======================
-# 3. main (추론)
+# 4. main (추론)
 # =======================
 
 def main():
@@ -520,8 +615,8 @@ def main():
         print(f"경고: {PK_STATS_PATH} 파일이 없어, PK Stats 없이 진행합니다.")
         pk_stats = pd.DataFrame()
 
-    # Fold별 모델/보정기 로드
-    print(f"{N_SPLITS}-Fold 모델 및 보정기 로드...")
+    # Fold별 CatBoost 모델 로드
+    print(f"{N_SPLITS}-Fold CatBoost 모델 로드...")
     models_A = []
     models_B = []
     for fold in range(N_SPLITS):
@@ -529,23 +624,15 @@ def main():
             cat_A = joblib.load(os.path.join(MODEL_DIR, f"catboost_A_fold{fold}.pkl"))
         except FileNotFoundError:
             cat_A = None
-        try:
-            calib_A = joblib.load(os.path.join(MODEL_DIR, f"calibrator_A_fold{fold}.pkl"))
-        except FileNotFoundError:
-            calib_A = None
-        models_A.append((cat_A, calib_A))
+        models_A.append(cat_A)
 
         try:
             cat_B = joblib.load(os.path.join(MODEL_DIR, f"catboost_B_fold{fold}.pkl"))
         except FileNotFoundError:
             cat_B = None
-        try:
-            calib_B = joblib.load(os.path.join(MODEL_DIR, f"calibrator_B_fold{fold}.pkl"))
-        except FileNotFoundError:
-            calib_B = None
-        models_B.append((cat_B, calib_B))
+        models_B.append(cat_B)
 
-    # Global Isotonic 보정기 (있으면 우선 사용, 없으면 fold별 보정기로 폴백)
+    # Global Isotonic 보정기
     cal_A_global = None
     cal_B_global = None
     path_A_global = os.path.join(MODEL_DIR, "calibrator_A_global.pkl")
@@ -555,13 +642,13 @@ def main():
         cal_A_global = joblib.load(path_A_global)
         print("Global A Isotonic 보정기 로드 완료.")
     else:
-        print("Global A Isotonic 보정기 없음 → Fold별 보정 사용.")
+        print("Global A Isotonic 보정기 없음 → 비보정 확률 사용.")
 
     if os.path.exists(path_B_global):
         cal_B_global = joblib.load(path_B_global)
         print("Global B Isotonic 보정기 로드 완료.")
     else:
-        print("Global B Isotonic 보정기 없음 → Fold별 보정 사용.")
+        print("Global B Isotonic 보정기 없음 → 비보정 확률 사용.")
 
     # 테스트 데이터 로드
     print("테스트 데이터 로드...")
@@ -570,16 +657,14 @@ def main():
     Braw = pd.read_csv(TEST_B_PATH)
     print(f" meta={len(meta)}, Araw={len(Araw)}, Braw={len(Braw)}")
 
-    # meta에는 Test_id, Test 만 있다고 가정하고 나머지는 A/B raw에서 가져오거나 더미 생성
     if "Test" not in meta.columns:
         raise KeyError("meta(test.csv)에 'Test' 컬럼이 없습니다.")
 
-    # A/B 메타 분리 (가능한 경우 Test_id, Test만 사용)
+    # A/B 메타 분리
     if "Test_id" in meta.columns and "Test" in meta.columns:
         A_meta = meta[meta["Test"] == "A"][["Test_id", "Test"]].copy()
         B_meta = meta[meta["Test"] == "B"][["Test_id", "Test"]].copy()
     else:
-        # 혹시나 Test만 있는 이상한 케이스 대비
         A_meta = meta[meta["Test"] == "A"].copy()
         B_meta = meta[meta["Test"] == "B"].copy()
 
@@ -588,18 +673,15 @@ def main():
     B_df = B_meta.merge(Braw, on="Test_id", how="left")
     print(f" mapped: A={len(A_df)}, B={len(B_df)}")
 
-    # Age / TestDate / PrimaryKey 컬럼 정리 (suffix_x/_y 포함해서 처리)
+    # 핵심 컬럼 보정
     def ensure_core_cols(df, name):
-        # PrimaryKey
         if "PrimaryKey" not in df.columns:
             if "PrimaryKey_x" in df.columns:
                 df["PrimaryKey"] = df["PrimaryKey_x"]
             elif "PrimaryKey_y" in df.columns:
                 df["PrimaryKey"] = df["PrimaryKey_y"]
             else:
-                # 테스트 셋에 PK가 전혀 없을 수 있음 → 더미 ID
                 df["PrimaryKey"] = -1
-        # Age
         if "Age" not in df.columns:
             if "Age_x" in df.columns:
                 df["Age"] = df["Age_x"]
@@ -607,7 +689,6 @@ def main():
                 df["Age"] = df["Age_y"]
             else:
                 df["Age"] = np.nan
-        # TestDate
         if "TestDate" not in df.columns:
             if "TestDate_x" in df.columns:
                 df["TestDate"] = df["TestDate_x"]
@@ -615,7 +696,6 @@ def main():
                 df["TestDate"] = df["TestDate_y"]
             else:
                 df["TestDate"] = np.nan
-
         return df
 
     A_df = ensure_core_cols(A_df, "A")
@@ -627,7 +707,7 @@ def main():
     print("\n[INFO] Preprocessing B (1차, 2차)...")
     B_feat = add_features_B(preprocess_B(B_df)) if len(B_df) > 0 else pd.DataFrame()
 
-    # PK Stats 병합 (B만 사용)
+    # PK Stats 병합 (B만)
     print("\n[INFO] 운전자 통계 피처 병합...")
     if len(B_feat) > 0 and not pk_stats.empty:
         if "PrimaryKey" not in B_feat.columns:
@@ -640,79 +720,66 @@ def main():
     # K-Fold 예측
     print("\n[INFO] Inference K-Fold Ensemble...")
     preds_A_raw_folds = []
-    preds_A_cal_folds = []
     preds_B_raw_folds = []
-    preds_B_cal_folds = []
-
-    use_global_A = cal_A_global is not None
-    use_global_B = cal_B_global is not None
 
     for fold in range(N_SPLITS):
         print(f"--- Fold {fold+1}/{N_SPLITS} 예측 ---")
+
         # A
-        cat_A, calib_A = models_A[fold]
+        cat_A = models_A[fold]
         if len(A_feat) == 0 or cat_A is None:
             raw_A = np.zeros(len(A_feat))
-            cal_A_fold = np.zeros(len(A_feat))
         else:
             XA = align_features_A(A_feat, cat_A)
             if XA.shape[0] == 0 or XA.shape[1] == 0:
                 raw_A = np.zeros(len(A_feat))
             else:
                 raw_A = cat_A.predict_proba(XA)[:, 1]
-            if calib_A is not None:
-                cal_A_fold = calib_A.predict(raw_A)
-            else:
-                cal_A_fold = raw_A
-
         preds_A_raw_folds.append(raw_A)
-        preds_A_cal_folds.append(cal_A_fold)
 
         # B
-        cat_B, calib_B = models_B[fold]
+        cat_B = models_B[fold]
         if len(B_feat) == 0 or cat_B is None:
             raw_B = np.zeros(len(B_feat))
-            cal_B_fold = np.zeros(len(B_feat))
         else:
             XB = align_features_B(B_feat, cat_B)
             if XB.shape[0] == 0 or XB.shape[1] == 0:
                 raw_B = np.zeros(len(B_feat))
             else:
                 raw_B = cat_B.predict_proba(XB)[:, 1]
-            if calib_B is not None:
-                cal_B_fold = calib_B.predict(raw_B)
-            else:
-                cal_B_fold = raw_B
-
         preds_B_raw_folds.append(raw_B)
-        preds_B_cal_folds.append(cal_B_fold)
 
-    # Fold 평균 + Global Isotonic 적용 (있으면)
+    # Fold 평균 + Global Isotonic 적용
     if len(A_feat) > 0:
         mean_A_raw = np.mean(preds_A_raw_folds, axis=0)
-        mean_A_cal = np.mean(preds_A_cal_folds, axis=0)
-        if use_global_A:
+        if cal_A_global is not None:
             final_predA = cal_A_global.predict(mean_A_raw)
         else:
-            final_predA = mean_A_cal
+            final_predA = mean_A_raw
     else:
         final_predA = np.array([])
 
     if len(B_feat) > 0:
         mean_B_raw = np.mean(preds_B_raw_folds, axis=0)
-        mean_B_cal = np.mean(preds_B_cal_folds, axis=0)
-        if use_global_B:
+        if cal_B_global is not None:
             final_predB = cal_B_global.predict(mean_B_raw)
         else:
-            final_predB = mean_B_cal
+            final_predB = mean_B_raw
     else:
         final_predB = np.array([])
 
-    # 최종 Test_id 매핑
+    # 안전장치: NaN/inf 제거 + [0,1] 클리핑
+    final_predA = np.nan_to_num(final_predA.astype(float), nan=0.0, posinf=1.0, neginf=0.0)
+    final_predB = np.nan_to_num(final_predB.astype(float), nan=0.0, posinf=1.0, neginf=0.0)
+    final_predA = np.clip(final_predA, 0.0, 1.0)
+    final_predB = np.clip(final_predB, 0.0, 1.0)
+
+    # Test_id 매핑
     subA = pd.DataFrame({"Test_id": A_df["Test_id"].values, "prob": final_predA})
     subB = pd.DataFrame({"Test_id": B_df["Test_id"].values, "prob": final_predB})
     probs = pd.concat([subA, subB], axis=0, ignore_index=True)
 
+    # sample_submission 포맷 맞추기
     os.makedirs(OUT_DIR, exist_ok=True)
     try:
         sample = pd.read_csv(SAMPLE_SUB_PATH)
@@ -723,6 +790,12 @@ def main():
     out = sample.drop(columns=["Label"], errors="ignore").merge(probs, on="Test_id", how="left")
     out["Label"] = out["prob"].astype(float).fillna(0.0)
     out = out.drop(columns=["prob"])
+
+    # Label 값 방어
+    out["Label"] = np.nan_to_num(out["Label"].astype(float), nan=0.0, posinf=1.0, neginf=0.0)
+    out["Label"] = np.clip(out["Label"], 0.0, 1.0)
+
+    # 컬럼 순서 sample과 동일
     out = out[sample.columns]
 
     out.to_csv(OUT_PATH, index=False)
