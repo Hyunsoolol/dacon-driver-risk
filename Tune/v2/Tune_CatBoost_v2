@@ -1,0 +1,288 @@
+## ================================================================
+## CatBoost v15: 5-Fold 기반 하이퍼파라미터 랜덤 서치 튜닝용 스크립트
+##  - all_train_data.feather 필요 (1_Preprocess.ipynb 결과)
+##  - A 모델 / B 모델 각각 튜닝
+## ================================================================
+
+import os
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+import joblib
+import warnings
+import catboost as cb
+
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score, mean_squared_error
+from sklearn.isotonic import IsotonicRegression
+
+tqdm.pandas()
+warnings.filterwarnings("ignore")
+
+BASE_DIR = "./data"
+FEATURE_SAVE_PATH = os.path.join(BASE_DIR, "all_train_data.feather")
+
+print("[INFO] all_train_data.feather 로드 중...")
+all_train_df = pd.read_feather(FEATURE_SAVE_PATH)
+print("[INFO] all_train_df shape:", all_train_df.shape)
+
+# ---------------- Metric: Combined Score (대회 공식 점수) ----------------
+def expected_calibration_error(y_true, y_prob, n_bins=10):
+    if len(y_true) == 0 or len(y_prob) == 0:
+        return 0.0
+    y_prob = np.nan_to_num(y_prob, nan=0.0)
+
+    df = pd.DataFrame({"y_true": y_true, "y_prob": y_prob})
+
+    bin_edges = np.linspace(0, 1, n_bins + 1)
+    bin_edges[0] = -0.001
+    bin_edges[-1] = 1.001
+
+    df["y_prob"] = np.clip(df["y_prob"], 0, 1)
+    df["bin"] = pd.cut(df["y_prob"], bins=bin_edges, right=True)
+
+    bin_stats = df.groupby("bin", observed=True).agg(
+        bin_total=("y_prob", "count"),
+        prob_true=("y_true", "mean"),
+        prob_pred=("y_prob", "mean"),
+    )
+
+    non_empty = bin_stats[bin_stats["bin_total"] > 0]
+    if len(non_empty) == 0:
+        return 0.0
+
+    w = non_empty["bin_total"] / len(y_prob)
+    pt = non_empty["prob_true"]
+    pp = non_empty["prob_pred"]
+
+    return np.sum(w * np.abs(pt - pp))
+
+
+def combined_score(y_true, y_prob):
+    """
+    score = 0.5 * (1 - AUC) + 0.25 * Brier + 0.25 * ECE
+    """
+    if (
+        len(y_true) == 0
+        or len(y_prob) == 0
+        or np.sum(y_true) == 0
+        or np.sum(y_true) == len(y_true)
+    ):
+        return 1.0
+
+    y_prob = np.nan_to_num(y_prob, nan=0.0)
+    auc = roc_auc_score(y_true, y_prob)
+    brier = mean_squared_error(y_true, y_prob)
+    ece = expected_calibration_error(y_true, y_prob)
+    score = 0.5 * (1 - auc) + 0.25 * brier + 0.25 * ece
+    return score
+
+# ---------------- 공통 설정 & Fold 분리 ----------------
+CAT_FEATURES = ["Age", "PrimaryKey"]
+DROP_COLS_TRAIN = [
+    "Test_id", "Test_x", "Test_y",
+    "Label", "TestDate", "Year", "Month",
+    "base_index"
+]
+
+all_train_df["Label"] = all_train_df["Label"].fillna(0)
+
+N_SPLITS = 5
+skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=42)
+fold_indices = list(skf.split(all_train_df, all_train_df["Label"]))
+print(f"[INFO] StratifiedKFold {N_SPLITS} splits 준비 완료.")
+
+# ---------------- PK Stats 생성 함수 (B 모델용) ----------------
+def build_pk_stats(train_df_fold: pd.DataFrame) -> pd.DataFrame:
+    agg_funcs = {
+        "Age_num": ["mean", "min", "max"],
+        "YearMonthIndex": ["mean", "std", "min", "max"],
+        "A1_rt_mean": ["mean", "std"],
+        "A4_acc_congruent": ["mean", "std"],
+        "A4_acc_incongruent": ["mean", "std"],
+        "A4_stroop_rt_cost": ["mean", "std"],
+        "RiskScore": ["mean", "std", "max"],
+        "B1_change_acc": ["mean", "std"],
+        "B1_nonchange_acc": ["mean", "std"],
+        "B3_rt_mean": ["mean", "std"],
+        "B4_flanker_acc_cost": ["mean", "std"],
+        "B4_rt_mean": ["mean", "std"],
+        "RiskScore_B": ["mean", "std", "max"],
+        "Test_id": ["count"],
+    }
+    valid_agg = {c: f for c, f in agg_funcs.items() if c in train_df_fold.columns}
+    pk_stats = train_df_fold.groupby("PrimaryKey").agg(valid_agg)
+    pk_stats.columns = ["_".join(col).strip() for col in pk_stats.columns.values]
+    if "Test_id_count" in pk_stats.columns:
+        pk_stats = pk_stats.rename(columns={"Test_id_count": "pk_test_total_count"})
+
+    # A/B 응시 횟수
+    tp = train_df_fold.groupby("PrimaryKey")["Test_x"].value_counts().unstack(fill_value=0)
+    if "A" not in tp.columns:
+        tp["A"] = 0
+    if "B" not in tp.columns:
+        tp["B"] = 0
+    tp = tp[["A", "B"]]
+    tp.columns = ["pk_test_A_count", "pk_test_B_count"]
+
+    pk_stats = pk_stats.join(tp, how="left").reset_index()
+    return pk_stats
+
+# ---------------- 단일 파라미터 셋에 대한 CV 점수 계산 ----------------
+def eval_params_A(params: dict) -> float:
+    scores = []
+    for fold, (tr_idx, va_idx) in enumerate(fold_indices):
+        train_df = all_train_df.iloc[tr_idx].copy()
+        val_df = all_train_df.iloc[va_idx].copy()
+
+        X_tr = train_df[train_df["Test_x"] == "A"].copy()
+        X_va = val_df[val_df["Test_x"] == "A"].copy()
+        y_tr = X_tr["Label"].values
+        y_va = X_va["Label"].values
+
+        if len(X_tr) == 0 or len(X_va) == 0 or len(np.unique(y_tr)) < 2:
+            continue
+
+        base_cols = [c for c in X_tr.columns if not c.startswith("pk_")]
+        num_cols = list(set(base_cols) - set(CAT_FEATURES) - set(DROP_COLS_TRAIN))
+
+        tr_X = X_tr[num_cols + CAT_FEATURES].copy()
+        va_X = X_va[num_cols + CAT_FEATURES].copy()
+
+        for c in CAT_FEATURES:
+            tr_X[c] = tr_X[c].fillna("nan").astype(str)
+            va_X[c] = va_X[c].fillna("nan").astype(str)
+
+        cat_idx = [tr_X.columns.get_loc(c) for c in CAT_FEATURES if c in tr_X.columns]
+
+        model = cb.CatBoostClassifier(
+            iterations=2000,
+            loss_function="Logloss",
+            eval_metric="AUC",
+            random_seed=42,
+            thread_count=-1,
+            early_stopping_rounds=100,
+            verbose=False,
+            **params,
+        )
+        model.fit(tr_X, y_tr, eval_set=(va_X, y_va), cat_features=cat_idx, verbose=False)
+
+        # 간단히 Isotonic 한 번 써서 Combined Score 근사
+        p_uncal = model.predict_proba(va_X)[:, 1]
+        ir = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip")
+        ir.fit(p_uncal, y_va)
+        p_cal = ir.predict(p_uncal)
+
+        scores.append(combined_score(y_va, p_cal))
+
+    return float(np.mean(scores)) if scores else 1.0
+
+
+def eval_params_B(params: dict) -> float:
+    scores = []
+    for fold, (tr_idx, va_idx) in enumerate(fold_indices):
+        train_df = all_train_df.iloc[tr_idx].copy()
+        val_df = all_train_df.iloc[va_idx].copy()
+
+        # PK Stats는 fold-train에서만 생성
+        pk_stats_fold = build_pk_stats(train_df)
+
+        X_tr = train_df[train_df["Test_x"] == "B"].copy()
+        X_va = val_df[val_df["Test_x"] == "B"].copy()
+        y_tr = X_tr["Label"].values
+        y_va = X_va["Label"].values
+
+        if len(X_tr) == 0 or len(X_va) == 0 or len(np.unique(y_tr)) < 2:
+            continue
+
+        X_tr = X_tr.merge(pk_stats_fold, on="PrimaryKey", how="left")
+        X_va = X_va.merge(pk_stats_fold, on="PrimaryKey", how="left")
+
+        num_cols = list(set(X_tr.columns) - set(CAT_FEATURES) - set(DROP_COLS_TRAIN))
+        common_num = list(set(num_cols) & set(X_va.columns))
+
+        tr_X = X_tr[common_num + CAT_FEATURES].copy()
+        va_X = X_va[common_num + CAT_FEATURES].copy()
+
+        for c in CAT_FEATURES:
+            tr_X[c] = tr_X[c].fillna("nan").astype(str)
+            va_X[c] = va_X[c].fillna("nan").astype(str)
+
+        cat_idx = [tr_X.columns.get_loc(c) for c in CAT_FEATURES if c in tr_X.columns]
+
+        model = cb.CatBoostClassifier(
+            iterations=2000,
+            loss_function="Logloss",
+            eval_metric="AUC",
+            random_seed=42,
+            thread_count=-1,
+            early_stopping_rounds=100,
+            verbose=False,
+            **params,
+        )
+        model.fit(tr_X, y_tr, eval_set=(va_X, y_va), cat_features=cat_idx, verbose=False)
+
+        p_uncal = model.predict_proba(va_X)[:, 1]
+        ir = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip")
+        ir.fit(p_uncal, y_va)
+        p_cal = ir.predict(p_uncal)
+
+        scores.append(combined_score(y_va, p_cal))
+
+    return float(np.mean(scores)) if scores else 1.0
+
+# ---------------- 랜덤 서치 설정 ----------------
+import random
+
+SPACE_A = {
+    "depth": [4, 5, 6],
+    "learning_rate": [0.03, 0.05, 0.07],
+    "l2_leaf_reg": [3, 5, 10],
+    "random_strength": [0.5, 1.0, 2.0],
+    "bagging_temperature": [0.3, 0.5, 1.0],
+    "border_count": [128, 254],
+}
+
+SPACE_B = {
+    "depth": [3, 4, 5],
+    "learning_rate": [0.03, 0.05, 0.07],
+    "l2_leaf_reg": [3, 5, 10],
+    "random_strength": [1.0, 2.0, 3.0],
+    "bagging_temperature": [0.3, 0.5, 1.0],
+    "border_count": [128, 254],
+}
+
+def sample_from(space: dict) -> dict:
+    return {k: random.choice(v) for k, v in space.items()}
+
+# ---------------- A / B 각각 랜덤 서치 ----------------
+def random_search(space, eval_fn, n_trials=25, label="A"):
+    best_score = 1.0
+    best_params = None
+
+    for t in range(1, n_trials + 1):
+        params = sample_from(space)
+        print(f"\n[{label}] Trial {t}/{n_trials} params={params}")
+        score = eval_fn(params)
+        print(f"[{label}] -> CV Combined Score = {score:.5f}")
+
+        if score < best_score:
+            best_score = score
+            best_params = params
+            print(f"[{label}] ★ Update best! score={best_score:.5f}, params={best_params}")
+
+    print(f"\n[{label}] Random Search 완료.")
+    print(f"[{label}] Best Score = {best_score:.5f}")
+    print(f"[{label}] Best Params = {best_params}")
+    return best_params, best_score
+
+# ---------------- 실제 실행 ----------------
+# 시간이 걱정되면 n_trials 를 10~15 정도로 줄여서 먼저 러프하게 돌려보고,
+# 괜찮은 구간에서 다시 좁혀서 20~30회 정도 추가 탐색하는 식으로 운영하면 됨.
+best_A_params, best_A_score = random_search(SPACE_A, eval_params_A, n_trials=20, label="A")
+best_B_params, best_B_score = random_search(SPACE_B, eval_params_B, n_trials=20, label="B")
+
+print("\n================ 최종 결과 요약 ================")
+print("A-model best params:", best_A_params, "  CV score:", best_A_score)
+print("B-model best params:", best_B_params, "  CV score:", best_B_score)
+print("→ 2_Train_Models_v15.ipynb 의 BEST_A_PARAMS / BEST_B_PARAMS 에 이 값들을 넣어주면 됨.")
