@@ -1,0 +1,1002 @@
+Big-Tech ML Engineer v17: Tuned CatBoost + PK Stats(B) + Random-Seed Ensemble 5-Fold 학습 시작.
+전처리된 메인 피처 로드 중... (매우 빠름)
+데이터 로드 완료: (944767, 118)
+
+[INFO] K-Fold 교차 검증 분리 시작...
+5-Fold 분리 완료.
+
+================ Fold 1/5 학습 시작 ================
+
+[Fold 1] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP + Seed Ensemble) 학습 ---
+
+[A-Fold0-seed42] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold0-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5000000	best: 0.5000000 (0)	total: 271ms	remaining: 13m 32s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7165228187
+bestIteration = 298
+
+Shrink model to first 299 iterations.
+
+[A-Fold0-seed42] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0-seed42] 비보정 단독 점수:
+  AUC: 0.7165, Brier: 0.0201, ECE: 0.0009
+  Combined Score: 0.14698
+[A-Fold0-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7187, Brier: 0.0199, ECE: 0.0000
+  Combined Score: 0.14561
+[Fold 1] Saved A model & calibrator for seed=42 -> ./model\catboost_A_fold0_seed42.pkl ./model\calibrator_A_fold0_seed42.pkl
+
+[A-Fold0-seed2025] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold0-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5964148	best: 0.5964148 (0)	total: 526ms	remaining: 26m 17s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7153120758
+bestIteration = 595
+
+Shrink model to first 596 iterations.
+
+[A-Fold0-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0-seed2025] 비보정 단독 점수:
+  AUC: 0.7153, Brier: 0.0201, ECE: 0.0006
+  Combined Score: 0.14752
+[A-Fold0-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7175, Brier: 0.0200, ECE: 0.0000
+  Combined Score: 0.14625
+[Fold 1] Saved A model & calibrator for seed=2025 -> ./model\catboost_A_fold0_seed2025.pkl ./model\calibrator_A_fold0_seed2025.pkl
+
+[A-Fold0-seed7] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold0-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5873997	best: 0.5873997 (0)	total: 544ms	remaining: 27m 11s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7192145635
+bestIteration = 712
+
+Shrink model to first 713 iterations.
+
+[A-Fold0-seed7] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0-seed7] 비보정 단독 점수:
+  AUC: 0.7192, Brier: 0.0200, ECE: 0.0007
+  Combined Score: 0.14557
+[A-Fold0-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7215, Brier: 0.0199, ECE: 0.0000
+  Combined Score: 0.14423
+[Fold 1] Saved A model & calibrator for seed=7 -> ./model\catboost_A_fold0_seed7.pkl ./model\calibrator_A_fold0_seed7.pkl
+
+[A-Fold0-seed77] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold0-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5735814	best: 0.5735814 (0)	total: 431ms	remaining: 21m 31s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7216620259
+bestIteration = 763
+
+Shrink model to first 764 iterations.
+
+[A-Fold0-seed77] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0-seed77] 비보정 단독 점수:
+  AUC: 0.7217, Brier: 0.0200, ECE: 0.0006
+  Combined Score: 0.14432
+[A-Fold0-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7237, Brier: 0.0199, ECE: 0.0000
+  Combined Score: 0.14309
+[Fold 1] Saved A model & calibrator for seed=77 -> ./model\catboost_A_fold0_seed77.pkl ./model\calibrator_A_fold0_seed77.pkl
+
+[A-Fold0-seed999] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold0-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5428965	best: 0.5428965 (0)	total: 514ms	remaining: 25m 42s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7176614325
+bestIteration = 356
+
+Shrink model to first 357 iterations.
+
+[A-Fold0-seed999] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0-seed999] 비보정 단독 점수:
+  AUC: 0.7177, Brier: 0.0200, ECE: 0.0014
+  Combined Score: 0.14653
+[A-Fold0-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7201, Brier: 0.0199, ECE: 0.0000
+  Combined Score: 0.14491
+[Fold 1] Saved A model & calibrator for seed=999 -> ./model\catboost_A_fold0_seed999.pkl ./model\calibrator_A_fold0_seed999.pkl
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats + Seed Ensemble) 학습 ---
+
+[B-Fold0-seed42] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold0-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5099123	best: 0.5099123 (0)	total: 111ms	remaining: 5m 33s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7465346318
+bestIteration = 491
+
+Shrink model to first 492 iterations.
+
+[B-Fold0-seed42] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0-seed42] 비보정 단독 점수:
+  AUC: 0.7465, Brier: 0.0379, ECE: 0.0052
+  Combined Score: 0.13751
+[B-Fold0-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7491, Brier: 0.0371, ECE: 0.0000
+  Combined Score: 0.13471
+[Fold 1] Saved B model & calibrator for seed=42 -> ./model\catboost_B_fold0_seed42.pkl ./model\calibrator_B_fold0_seed42.pkl
+
+[B-Fold0-seed2025] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold0-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5269752	best: 0.5269752 (0)	total: 123ms	remaining: 6m 9s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7440018122
+bestIteration = 308
+
+Shrink model to first 309 iterations.
+
+[B-Fold0-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0-seed2025] 비보정 단독 점수:
+  AUC: 0.7440, Brier: 0.0375, ECE: 0.0046
+  Combined Score: 0.13852
+[B-Fold0-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7472, Brier: 0.0371, ECE: 0.0000
+  Combined Score: 0.13568
+[Fold 1] Saved B model & calibrator for seed=2025 -> ./model\catboost_B_fold0_seed2025.pkl ./model\calibrator_B_fold0_seed2025.pkl
+
+[B-Fold0-seed7] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold0-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6124835	best: 0.6124835 (0)	total: 121ms	remaining: 6m 1s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7450330388
+bestIteration = 423
+
+Shrink model to first 424 iterations.
+
+[B-Fold0-seed7] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0-seed7] 비보정 단독 점수:
+  AUC: 0.7450, Brier: 0.0374, ECE: 0.0032
+  Combined Score: 0.13763
+[B-Fold0-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7481, Brier: 0.0371, ECE: 0.0000
+  Combined Score: 0.13523
+[Fold 1] Saved B model & calibrator for seed=7 -> ./model\catboost_B_fold0_seed7.pkl ./model\calibrator_B_fold0_seed7.pkl
+
+[B-Fold0-seed77] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold0-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5147010	best: 0.5147010 (0)	total: 123ms	remaining: 6m 8s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7467778065
+bestIteration = 334
+
+Shrink model to first 335 iterations.
+
+[B-Fold0-seed77] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0-seed77] 비보정 단독 점수:
+  AUC: 0.7468, Brier: 0.0374, ECE: 0.0036
+  Combined Score: 0.13685
+[B-Fold0-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7504, Brier: 0.0371, ECE: 0.0000
+  Combined Score: 0.13406
+[Fold 1] Saved B model & calibrator for seed=77 -> ./model\catboost_B_fold0_seed77.pkl ./model\calibrator_B_fold0_seed77.pkl
+
+[B-Fold0-seed999] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold0-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5828051	best: 0.5828051 (0)	total: 119ms	remaining: 5m 57s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7475470752
+bestIteration = 447
+
+Shrink model to first 448 iterations.
+
+[B-Fold0-seed999] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0-seed999] 비보정 단독 점수:
+  AUC: 0.7475, Brier: 0.0375, ECE: 0.0033
+  Combined Score: 0.13641
+[B-Fold0-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7505, Brier: 0.0371, ECE: 0.0000
+  Combined Score: 0.13404
+[Fold 1] Saved B model & calibrator for seed=999 -> ./model\catboost_B_fold0_seed999.pkl ./model\calibrator_B_fold0_seed999.pkl
+
+================ Fold 2/5 학습 시작 ================
+
+[Fold 2] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP + Seed Ensemble) 학습 ---
+
+[A-Fold1-seed42] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold1-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5436174	best: 0.5436174 (0)	total: 540ms	remaining: 26m 58s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7192152556
+bestIteration = 188
+
+Shrink model to first 189 iterations.
+
+[A-Fold1-seed42] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1-seed42] 비보정 단독 점수:
+  AUC: 0.7192, Brier: 0.0202, ECE: 0.0006
+  Combined Score: 0.14559
+[A-Fold1-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7214, Brier: 0.0201, ECE: 0.0000
+  Combined Score: 0.14434
+[Fold 2] Saved A model & calibrator for seed=42 -> ./model\catboost_A_fold1_seed42.pkl ./model\calibrator_A_fold1_seed42.pkl
+
+[A-Fold1-seed2025] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold1-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.6010679	best: 0.6010679 (0)	total: 563ms	remaining: 28m 8s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7195100464
+bestIteration = 204
+
+Shrink model to first 205 iterations.
+
+[A-Fold1-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1-seed2025] 비보정 단독 점수:
+  AUC: 0.7195, Brier: 0.0202, ECE: 0.0007
+  Combined Score: 0.14545
+[A-Fold1-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7215, Brier: 0.0200, ECE: 0.0000
+  Combined Score: 0.14425
+[Fold 2] Saved A model & calibrator for seed=2025 -> ./model\catboost_A_fold1_seed2025.pkl ./model\calibrator_A_fold1_seed2025.pkl
+
+[A-Fold1-seed7] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold1-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.6189288	best: 0.6189288 (0)	total: 533ms	remaining: 26m 37s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7206377383
+bestIteration = 399
+
+Shrink model to first 400 iterations.
+
+[A-Fold1-seed7] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1-seed7] 비보정 단독 점수:
+  AUC: 0.7206, Brier: 0.0201, ECE: 0.0013
+  Combined Score: 0.14503
+[A-Fold1-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7230, Brier: 0.0200, ECE: 0.0000
+  Combined Score: 0.14352
+[Fold 2] Saved A model & calibrator for seed=7 -> ./model\catboost_A_fold1_seed7.pkl ./model\calibrator_A_fold1_seed7.pkl
+
+[A-Fold1-seed77] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold1-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5593658	best: 0.5593658 (0)	total: 526ms	remaining: 26m 16s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7219654166
+bestIteration = 445
+
+Shrink model to first 446 iterations.
+
+[A-Fold1-seed77] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1-seed77] 비보정 단독 점수:
+  AUC: 0.7220, Brier: 0.0202, ECE: 0.0006
+  Combined Score: 0.14422
+[A-Fold1-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7244, Brier: 0.0200, ECE: 0.0000
+  Combined Score: 0.14281
+[Fold 2] Saved A model & calibrator for seed=77 -> ./model\catboost_A_fold1_seed77.pkl ./model\calibrator_A_fold1_seed77.pkl
+
+[A-Fold1-seed999] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold1-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5295209	best: 0.5295209 (0)	total: 526ms	remaining: 26m 17s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7186070915
+bestIteration = 245
+
+Shrink model to first 246 iterations.
+
+[A-Fold1-seed999] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1-seed999] 비보정 단독 점수:
+  AUC: 0.7186, Brier: 0.0202, ECE: 0.0006
+  Combined Score: 0.14590
+[A-Fold1-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7207, Brier: 0.0201, ECE: 0.0000
+  Combined Score: 0.14467
+[Fold 2] Saved A model & calibrator for seed=999 -> ./model\catboost_A_fold1_seed999.pkl ./model\calibrator_A_fold1_seed999.pkl
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats + Seed Ensemble) 학습 ---
+
+[B-Fold1-seed42] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold1-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5452910	best: 0.5452910 (0)	total: 125ms	remaining: 6m 15s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7437151624
+bestIteration = 307
+
+Shrink model to first 308 iterations.
+
+[B-Fold1-seed42] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1-seed42] 비보정 단독 점수:
+  AUC: 0.7437, Brier: 0.0369, ECE: 0.0044
+  Combined Score: 0.13846
+[B-Fold1-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7494, Brier: 0.0366, ECE: 0.0000
+  Combined Score: 0.13447
+[Fold 2] Saved B model & calibrator for seed=42 -> ./model\catboost_B_fold1_seed42.pkl ./model\calibrator_B_fold1_seed42.pkl
+
+[B-Fold1-seed2025] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold1-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5839443	best: 0.5839443 (0)	total: 133ms	remaining: 6m 37s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7451573125
+bestIteration = 706
+
+Shrink model to first 707 iterations.
+
+[B-Fold1-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1-seed2025] 비보정 단독 점수:
+  AUC: 0.7452, Brier: 0.0375, ECE: 0.0090
+  Combined Score: 0.13905
+[B-Fold1-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7481, Brier: 0.0367, ECE: 0.0000
+  Combined Score: 0.13511
+[Fold 2] Saved B model & calibrator for seed=2025 -> ./model\catboost_B_fold1_seed2025.pkl ./model\calibrator_B_fold1_seed2025.pkl
+
+[B-Fold1-seed7] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold1-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5021625	best: 0.5021625 (0)	total: 122ms	remaining: 6m 6s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7428541689
+bestIteration = 577
+
+Shrink model to first 578 iterations.
+
+[B-Fold1-seed7] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1-seed7] 비보정 단독 점수:
+  AUC: 0.7429, Brier: 0.0375, ECE: 0.0107
+  Combined Score: 0.14064
+[B-Fold1-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7466, Brier: 0.0367, ECE: 0.0000
+  Combined Score: 0.13589
+[Fold 2] Saved B model & calibrator for seed=7 -> ./model\catboost_B_fold1_seed7.pkl ./model\calibrator_B_fold1_seed7.pkl
+
+[B-Fold1-seed77] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold1-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5564827	best: 0.5564827 (0)	total: 124ms	remaining: 6m 11s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7457007356
+bestIteration = 581
+
+Shrink model to first 582 iterations.
+
+[B-Fold1-seed77] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1-seed77] 비보정 단독 점수:
+  AUC: 0.7457, Brier: 0.0374, ECE: 0.0081
+  Combined Score: 0.13850
+[B-Fold1-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7495, Brier: 0.0366, ECE: 0.0000
+  Combined Score: 0.13442
+[Fold 2] Saved B model & calibrator for seed=77 -> ./model\catboost_B_fold1_seed77.pkl ./model\calibrator_B_fold1_seed77.pkl
+
+[B-Fold1-seed999] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold1-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.4994180	best: 0.4994180 (0)	total: 127ms	remaining: 6m 22s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7455865202
+bestIteration = 332
+
+Shrink model to first 333 iterations.
+
+[B-Fold1-seed999] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1-seed999] 비보정 단독 점수:
+  AUC: 0.7456, Brier: 0.0370, ECE: 0.0035
+  Combined Score: 0.13734
+[B-Fold1-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7492, Brier: 0.0367, ECE: 0.0000
+  Combined Score: 0.13458
+[Fold 2] Saved B model & calibrator for seed=999 -> ./model\catboost_B_fold1_seed999.pkl ./model\calibrator_B_fold1_seed999.pkl
+
+================ Fold 3/5 학습 시작 ================
+
+[Fold 3] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP + Seed Ensemble) 학습 ---
+
+[A-Fold2-seed42] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold2-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5552273	best: 0.5552273 (0)	total: 527ms	remaining: 26m 21s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7209593176
+bestIteration = 306
+
+Shrink model to first 307 iterations.
+
+[A-Fold2-seed42] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2-seed42] 비보정 단독 점수:
+  AUC: 0.7210, Brier: 0.0206, ECE: 0.0010
+  Combined Score: 0.14492
+[A-Fold2-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7236, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14332
+[Fold 3] Saved A model & calibrator for seed=42 -> ./model\catboost_A_fold2_seed42.pkl ./model\calibrator_A_fold2_seed42.pkl
+
+[A-Fold2-seed2025] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold2-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5614479	best: 0.5614479 (0)	total: 283ms	remaining: 14m 8s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7235038979
+bestIteration = 501
+
+Shrink model to first 502 iterations.
+
+[A-Fold2-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2-seed2025] 비보정 단독 점수:
+  AUC: 0.7235, Brier: 0.0207, ECE: 0.0010
+  Combined Score: 0.14366
+[A-Fold2-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7255, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14238
+[Fold 3] Saved A model & calibrator for seed=2025 -> ./model\catboost_A_fold2_seed2025.pkl ./model\calibrator_A_fold2_seed2025.pkl
+
+[A-Fold2-seed7] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold2-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5857706	best: 0.5857706 (0)	total: 526ms	remaining: 26m 18s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7216690012
+bestIteration = 403
+
+Shrink model to first 404 iterations.
+
+[A-Fold2-seed7] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2-seed7] 비보정 단독 점수:
+  AUC: 0.7217, Brier: 0.0207, ECE: 0.0011
+  Combined Score: 0.14463
+[A-Fold2-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7239, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14320
+[Fold 3] Saved A model & calibrator for seed=7 -> ./model\catboost_A_fold2_seed7.pkl ./model\calibrator_A_fold2_seed7.pkl
+
+[A-Fold2-seed77] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold2-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5285132	best: 0.5285132 (0)	total: 282ms	remaining: 14m 6s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7226438342
+bestIteration = 355
+
+Shrink model to first 356 iterations.
+
+[A-Fold2-seed77] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2-seed77] 비보정 단독 점수:
+  AUC: 0.7226, Brier: 0.0206, ECE: 0.0012
+  Combined Score: 0.14412
+[A-Fold2-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7247, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14278
+[Fold 3] Saved A model & calibrator for seed=77 -> ./model\catboost_A_fold2_seed77.pkl ./model\calibrator_A_fold2_seed77.pkl
+
+[A-Fold2-seed999] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold2-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.6002916	best: 0.6002916 (0)	total: 542ms	remaining: 27m 5s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7208908422
+bestIteration = 531
+
+Shrink model to first 532 iterations.
+
+[A-Fold2-seed999] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2-seed999] 비보정 단독 점수:
+  AUC: 0.7209, Brier: 0.0207, ECE: 0.0010
+  Combined Score: 0.14496
+[A-Fold2-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7229, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14367
+[Fold 3] Saved A model & calibrator for seed=999 -> ./model\catboost_A_fold2_seed999.pkl ./model\calibrator_A_fold2_seed999.pkl
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats + Seed Ensemble) 학습 ---
+
+[B-Fold2-seed42] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold2-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.4352654	best: 0.4352654 (0)	total: 124ms	remaining: 6m 10s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7443358033
+bestIteration = 370
+
+Shrink model to first 371 iterations.
+
+[B-Fold2-seed42] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2-seed42] 비보정 단독 점수:
+  AUC: 0.7443, Brier: 0.0365, ECE: 0.0056
+  Combined Score: 0.13836
+[B-Fold2-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7480, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13502
+[Fold 3] Saved B model & calibrator for seed=42 -> ./model\catboost_B_fold2_seed42.pkl ./model\calibrator_B_fold2_seed42.pkl
+
+[B-Fold2-seed2025] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold2-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5385610	best: 0.5385610 (0)	total: 128ms	remaining: 6m 23s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7447673111
+bestIteration = 524
+
+Shrink model to first 525 iterations.
+
+[B-Fold2-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2-seed2025] 비보정 단독 점수:
+  AUC: 0.7448, Brier: 0.0368, ECE: 0.0066
+  Combined Score: 0.13847
+[B-Fold2-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7486, Brier: 0.0361, ECE: 0.0000
+  Combined Score: 0.13475
+[Fold 3] Saved B model & calibrator for seed=2025 -> ./model\catboost_B_fold2_seed2025.pkl ./model\calibrator_B_fold2_seed2025.pkl
+
+[B-Fold2-seed7] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold2-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5259667	best: 0.5259667 (0)	total: 142ms	remaining: 7m 5s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7442706746
+bestIteration = 596
+
+Shrink model to first 597 iterations.
+
+[B-Fold2-seed7] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2-seed7] 비보정 단독 점수:
+  AUC: 0.7443, Brier: 0.0371, ECE: 0.0076
+  Combined Score: 0.13904
+[B-Fold2-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7490, Brier: 0.0361, ECE: 0.0000
+  Combined Score: 0.13455
+[Fold 3] Saved B model & calibrator for seed=7 -> ./model\catboost_B_fold2_seed7.pkl ./model\calibrator_B_fold2_seed7.pkl
+
+[B-Fold2-seed77] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold2-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6132969	best: 0.6132969 (0)	total: 130ms	remaining: 6m 30s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.745963176
+bestIteration = 515
+
+Shrink model to first 516 iterations.
+
+[B-Fold2-seed77] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2-seed77] 비보정 단독 점수:
+  AUC: 0.7460, Brier: 0.0369, ECE: 0.0044
+  Combined Score: 0.13732
+[B-Fold2-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7496, Brier: 0.0361, ECE: 0.0000
+  Combined Score: 0.13425
+[Fold 3] Saved B model & calibrator for seed=77 -> ./model\catboost_B_fold2_seed77.pkl ./model\calibrator_B_fold2_seed77.pkl
+
+[B-Fold2-seed999] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold2-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6116155	best: 0.6116155 (0)	total: 127ms	remaining: 6m 19s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7428725586
+bestIteration = 563
+
+Shrink model to first 564 iterations.
+
+[B-Fold2-seed999] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2-seed999] 비보정 단독 점수:
+  AUC: 0.7429, Brier: 0.0377, ECE: 0.0118
+  Combined Score: 0.14094
+[B-Fold2-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7474, Brier: 0.0361, ECE: 0.0000
+  Combined Score: 0.13535
+[Fold 3] Saved B model & calibrator for seed=999 -> ./model\catboost_B_fold2_seed999.pkl ./model\calibrator_B_fold2_seed999.pkl
+
+================ Fold 4/5 학습 시작 ================
+
+[Fold 4] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP + Seed Ensemble) 학습 ---
+
+[A-Fold3-seed42] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold3-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5002304	best: 0.5002304 (0)	total: 307ms	remaining: 15m 19s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7145457592
+bestIteration = 580
+
+Shrink model to first 581 iterations.
+
+[A-Fold3-seed42] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3-seed42] 비보정 단독 점수:
+  AUC: 0.7145, Brier: 0.0206, ECE: 0.0010
+  Combined Score: 0.14813
+[A-Fold3-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7164, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14692
+[Fold 4] Saved A model & calibrator for seed=42 -> ./model\catboost_A_fold3_seed42.pkl ./model\calibrator_A_fold3_seed42.pkl
+
+[A-Fold3-seed2025] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold3-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5461289	best: 0.5461289 (0)	total: 544ms	remaining: 27m 12s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7132999725
+bestIteration = 431
+
+Shrink model to first 432 iterations.
+
+[A-Fold3-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3-seed2025] 비보정 단독 점수:
+  AUC: 0.7133, Brier: 0.0207, ECE: 0.0008
+  Combined Score: 0.14873
+[A-Fold3-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7158, Brier: 0.0206, ECE: 0.0000
+  Combined Score: 0.14726
+[Fold 4] Saved A model & calibrator for seed=2025 -> ./model\catboost_A_fold3_seed2025.pkl ./model\calibrator_A_fold3_seed2025.pkl
+
+[A-Fold3-seed7] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold3-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5481457	best: 0.5481457 (0)	total: 292ms	remaining: 14m 37s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7116111984
+bestIteration = 407
+
+Shrink model to first 408 iterations.
+
+[A-Fold3-seed7] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3-seed7] 비보정 단독 점수:
+  AUC: 0.7116, Brier: 0.0207, ECE: 0.0010
+  Combined Score: 0.14963
+[A-Fold3-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7139, Brier: 0.0206, ECE: 0.0000
+  Combined Score: 0.14821
+[Fold 4] Saved A model & calibrator for seed=7 -> ./model\catboost_A_fold3_seed7.pkl ./model\calibrator_A_fold3_seed7.pkl
+
+[A-Fold3-seed77] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold3-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5824876	best: 0.5824876 (0)	total: 565ms	remaining: 28m 15s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7143315972
+bestIteration = 453
+
+Shrink model to first 454 iterations.
+
+[A-Fold3-seed77] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3-seed77] 비보정 단독 점수:
+  AUC: 0.7143, Brier: 0.0207, ECE: 0.0011
+  Combined Score: 0.14829
+[A-Fold3-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7166, Brier: 0.0205, ECE: 0.0000
+  Combined Score: 0.14683
+[Fold 4] Saved A model & calibrator for seed=77 -> ./model\catboost_A_fold3_seed77.pkl ./model\calibrator_A_fold3_seed77.pkl
+
+[A-Fold3-seed999] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold3-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5447949	best: 0.5447949 (0)	total: 539ms	remaining: 26m 57s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7136564312
+bestIteration = 361
+
+Shrink model to first 362 iterations.
+
+[A-Fold3-seed999] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3-seed999] 비보정 단독 점수:
+  AUC: 0.7137, Brier: 0.0207, ECE: 0.0011
+  Combined Score: 0.14863
+[A-Fold3-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7158, Brier: 0.0206, ECE: 0.0000
+  Combined Score: 0.14723
+[Fold 4] Saved A model & calibrator for seed=999 -> ./model\catboost_A_fold3_seed999.pkl ./model\calibrator_A_fold3_seed999.pkl
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats + Seed Ensemble) 학습 ---
+
+[B-Fold3-seed42] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold3-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5488142	best: 0.5488142 (0)	total: 135ms	remaining: 6m 46s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7397678995
+bestIteration = 482
+
+Shrink model to first 483 iterations.
+
+[B-Fold3-seed42] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3-seed42] 비보정 단독 점수:
+  AUC: 0.7398, Brier: 0.0366, ECE: 0.0089
+  Combined Score: 0.14149
+[B-Fold3-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7431, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13748
+[Fold 4] Saved B model & calibrator for seed=42 -> ./model\catboost_B_fold3_seed42.pkl ./model\calibrator_B_fold3_seed42.pkl
+
+[B-Fold3-seed2025] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold3-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5401648	best: 0.5401648 (0)	total: 133ms	remaining: 6m 38s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7390459171
+bestIteration = 399
+
+Shrink model to first 400 iterations.
+
+[B-Fold3-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3-seed2025] 비보정 단독 점수:
+  AUC: 0.7390, Brier: 0.0365, ECE: 0.0048
+  Combined Score: 0.14080
+[B-Fold3-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7425, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13780
+[Fold 4] Saved B model & calibrator for seed=2025 -> ./model\catboost_B_fold3_seed2025.pkl ./model\calibrator_B_fold3_seed2025.pkl
+
+[B-Fold3-seed7] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold3-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6076966	best: 0.6076966 (0)	total: 124ms	remaining: 6m 12s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7355376058
+bestIteration = 476
+
+Shrink model to first 477 iterations.
+
+[B-Fold3-seed7] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3-seed7] 비보정 단독 점수:
+  AUC: 0.7355, Brier: 0.0367, ECE: 0.0090
+  Combined Score: 0.14367
+[B-Fold3-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7388, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13966
+[Fold 4] Saved B model & calibrator for seed=7 -> ./model\catboost_B_fold3_seed7.pkl ./model\calibrator_B_fold3_seed7.pkl
+
+[B-Fold3-seed77] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold3-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6245521	best: 0.6245521 (0)	total: 130ms	remaining: 6m 30s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7381234139
+bestIteration = 466
+
+Shrink model to first 467 iterations.
+
+[B-Fold3-seed77] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3-seed77] 비보정 단독 점수:
+  AUC: 0.7381, Brier: 0.0366, ECE: 0.0055
+  Combined Score: 0.14145
+[B-Fold3-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7417, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13822
+[Fold 4] Saved B model & calibrator for seed=77 -> ./model\catboost_B_fold3_seed77.pkl ./model\calibrator_B_fold3_seed77.pkl
+
+[B-Fold3-seed999] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold3-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5014324	best: 0.5014324 (0)	total: 139ms	remaining: 6m 57s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7376417278
+bestIteration = 463
+
+Shrink model to first 464 iterations.
+
+[B-Fold3-seed999] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3-seed999] 비보정 단독 점수:
+  AUC: 0.7376, Brier: 0.0366, ECE: 0.0057
+  Combined Score: 0.14176
+[B-Fold3-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7415, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13831
+[Fold 4] Saved B model & calibrator for seed=999 -> ./model\catboost_B_fold3_seed999.pkl ./model\calibrator_B_fold3_seed999.pkl
+
+================ Fold 5/5 학습 시작 ================
+
+[Fold 5] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP + Seed Ensemble) 학습 ---
+
+[A-Fold4-seed42] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold4-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5720942	best: 0.5720942 (0)	total: 560ms	remaining: 28m
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7108171855
+bestIteration = 197
+
+Shrink model to first 198 iterations.
+
+[A-Fold4-seed42] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4-seed42] 비보정 단독 점수:
+  AUC: 0.7108, Brier: 0.0208, ECE: 0.0014
+  Combined Score: 0.15014
+[A-Fold4-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7131, Brier: 0.0207, ECE: 0.0000
+  Combined Score: 0.14864
+[Fold 5] Saved A model & calibrator for seed=42 -> ./model\catboost_A_fold4_seed42.pkl ./model\calibrator_A_fold4_seed42.pkl
+
+[A-Fold4-seed2025] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold4-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5244182	best: 0.5244182 (0)	total: 523ms	remaining: 26m 8s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7088062765
+bestIteration = 344
+
+Shrink model to first 345 iterations.
+
+[A-Fold4-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4-seed2025] 비보정 단독 점수:
+  AUC: 0.7088, Brier: 0.0207, ECE: 0.0011
+  Combined Score: 0.15105
+[A-Fold4-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7112, Brier: 0.0206, ECE: 0.0000
+  Combined Score: 0.14954
+[Fold 5] Saved A model & calibrator for seed=2025 -> ./model\catboost_A_fold4_seed2025.pkl ./model\calibrator_A_fold4_seed2025.pkl
+
+[A-Fold4-seed7] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold4-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.6317537	best: 0.6317537 (0)	total: 531ms	remaining: 26m 33s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7082120921
+bestIteration = 294
+
+Shrink model to first 295 iterations.
+
+[A-Fold4-seed7] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4-seed7] 비보정 단독 점수:
+  AUC: 0.7082, Brier: 0.0208, ECE: 0.0012
+  Combined Score: 0.15139
+[A-Fold4-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7106, Brier: 0.0207, ECE: 0.0000
+  Combined Score: 0.14986
+[Fold 5] Saved A model & calibrator for seed=7 -> ./model\catboost_A_fold4_seed7.pkl ./model\calibrator_A_fold4_seed7.pkl
+
+[A-Fold4-seed77] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold4-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5213548	best: 0.5213548 (0)	total: 535ms	remaining: 26m 44s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7067367813
+bestIteration = 193
+
+Shrink model to first 194 iterations.
+
+[A-Fold4-seed77] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4-seed77] 비보정 단독 점수:
+  AUC: 0.7067, Brier: 0.0208, ECE: 0.0013
+  Combined Score: 0.15217
+[A-Fold4-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7089, Brier: 0.0207, ECE: 0.0000
+  Combined Score: 0.15071
+[Fold 5] Saved A model & calibrator for seed=77 -> ./model\catboost_A_fold4_seed77.pkl ./model\calibrator_A_fold4_seed77.pkl
+
+[A-Fold4-seed999] CatBoost (A, Tuned + Seed) 학습 시작... (피처 111개)
+[A-Fold4-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5741172	best: 0.5741172 (0)	total: 537ms	remaining: 26m 50s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7059827641
+bestIteration = 44
+
+Shrink model to first 45 iterations.
+
+[A-Fold4-seed999] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4-seed999] 비보정 단독 점수:
+  AUC: 0.7060, Brier: 0.0210, ECE: 0.0041
+  Combined Score: 0.15330
+[A-Fold4-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7083, Brier: 0.0208, ECE: 0.0000
+  Combined Score: 0.15105
+[Fold 5] Saved A model & calibrator for seed=999 -> ./model\catboost_A_fold4_seed999.pkl ./model\calibrator_A_fold4_seed999.pkl
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats + Seed Ensemble) 학습 ---
+
+[B-Fold4-seed42] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold4-seed42] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 42, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5150827	best: 0.5150827 (0)	total: 145ms	remaining: 7m 15s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7443873662
+bestIteration = 423
+
+Shrink model to first 424 iterations.
+
+[B-Fold4-seed42] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4-seed42] 비보정 단독 점수:
+  AUC: 0.7444, Brier: 0.0365, ECE: 0.0090
+  Combined Score: 0.13919
+[B-Fold4-seed42] ★보정된 단독★ 최종 점수:
+  AUC: 0.7480, Brier: 0.0359, ECE: 0.0000
+  Combined Score: 0.13498
+[Fold 5] Saved B model & calibrator for seed=42 -> ./model\catboost_B_fold4_seed42.pkl ./model\calibrator_B_fold4_seed42.pkl
+
+[B-Fold4-seed2025] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold4-seed2025] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 2025, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5095504	best: 0.5095504 (0)	total: 125ms	remaining: 6m 13s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7401538247
+bestIteration = 243
+
+Shrink model to first 244 iterations.
+
+[B-Fold4-seed2025] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4-seed2025] 비보정 단독 점수:
+  AUC: 0.7402, Brier: 0.0365, ECE: 0.0107
+  Combined Score: 0.14172
+[B-Fold4-seed2025] ★보정된 단독★ 최종 점수:
+  AUC: 0.7433, Brier: 0.0359, ECE: 0.0000
+  Combined Score: 0.13733
+[Fold 5] Saved B model & calibrator for seed=2025 -> ./model\catboost_B_fold4_seed2025.pkl ./model\calibrator_B_fold4_seed2025.pkl
+
+[B-Fold4-seed7] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold4-seed7] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 7, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.6128218	best: 0.6128218 (0)	total: 121ms	remaining: 6m 3s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.743867012
+bestIteration = 346
+
+Shrink model to first 347 iterations.
+
+[B-Fold4-seed7] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4-seed7] 비보정 단독 점수:
+  AUC: 0.7439, Brier: 0.0366, ECE: 0.0149
+  Combined Score: 0.14093
+[B-Fold4-seed7] ★보정된 단독★ 최종 점수:
+  AUC: 0.7473, Brier: 0.0359, ECE: 0.0000
+  Combined Score: 0.13535
+[Fold 5] Saved B model & calibrator for seed=7 -> ./model\catboost_B_fold4_seed7.pkl ./model\calibrator_B_fold4_seed7.pkl
+
+[B-Fold4-seed77] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold4-seed77] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 77, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5383879	best: 0.5383879 (0)	total: 127ms	remaining: 6m 19s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7425087379
+bestIteration = 405
+
+Shrink model to first 406 iterations.
+
+[B-Fold4-seed77] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4-seed77] 비보정 단독 점수:
+  AUC: 0.7425, Brier: 0.0366, ECE: 0.0154
+  Combined Score: 0.14177
+[B-Fold4-seed77] ★보정된 단독★ 최종 점수:
+  AUC: 0.7462, Brier: 0.0359, ECE: 0.0000
+  Combined Score: 0.13588
+[Fold 5] Saved B model & calibrator for seed=77 -> ./model\catboost_B_fold4_seed77.pkl ./model\calibrator_B_fold4_seed77.pkl
+
+[B-Fold4-seed999] CatBoost (B, Tuned + PK Stats + Seed) 학습 시작... (피처 145개)
+[B-Fold4-seed999] 사용 하이퍼파라미터: {'iterations': 3000, 'loss_function': 'Logloss', 'eval_metric': 'AUC', 'thread_count': -1, 'early_stopping_rounds': 100, 'verbose': 1000, 'random_seed': 999, 'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5000000	best: 0.5000000 (0)	total: 70.3ms	remaining: 3m 30s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.742109748
+bestIteration = 518
+
+Shrink model to first 519 iterations.
+
+[B-Fold4-seed999] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4-seed999] 비보정 단독 점수:
+  AUC: 0.7421, Brier: 0.0367, ECE: 0.0124
+  Combined Score: 0.14121
+[B-Fold4-seed999] ★보정된 단독★ 최종 점수:
+  AUC: 0.7450, Brier: 0.0358, ECE: 0.0000
+  Combined Score: 0.13647
+[Fold 5] Saved B model & calibrator for seed=999 -> ./model\catboost_B_fold4_seed999.pkl ./model\calibrator_B_fold4_seed999.pkl
+
+[INFO] K-Fold PK Stats 병합...
+
+[INFO] '최종 보정' CatBoost 모델 5 folds × 5 seeds × (A+B) + 최종 통계 피처 1개 저장 완료:
+  PK Stats Path: ./model\pk_stats_final.csv
+Big-Tech ML Engineer v17: 미션 완료. 이 모델들로 추론 스크립트에서 Seed Ensemble을 구성하세요.
