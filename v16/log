@@ -1,0 +1,235 @@
+Big-Tech ML Engineer v16: Tuned CatBoost + PK Stats(B) 5-Fold 학습 시작.
+전처리된 메인 피처 로드 중... (매우 빠름)
+데이터 로드 완료: (944767, 118)
+
+[INFO] K-Fold 교차 검증 분리 시작...
+5-Fold 분리 완료.
+
+[INFO] A-model BEST HP: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+[INFO] B-model BEST HP: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+
+--- Fold 1/5 학습 시작 ---
+
+[Fold 1] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP) 학습 ---
+
+[A-Fold0] CatBoost (A, Tuned) 학습 시작... (피처 111개)
+[A-Fold0] 사용 하이퍼파라미터: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5000000	best: 0.5000000 (0)	total: 259ms	remaining: 12m 57s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.714167861
+bestIteration = 468
+
+Shrink model to first 469 iterations.
+
+[A-Fold0] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold0] 비보정 단독 점수:
+  AUC: 0.7142, Brier: 0.0201, ECE: 0.0007
+  Combined Score: 0.14813
+[A-Fold0] ★보정된 단독★ 최종 점수:
+  AUC: 0.7166, Brier: 0.0200, ECE: 0.0000
+  Combined Score: 0.14670
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats) 학습 ---
+
+[B-Fold0] CatBoost (B, Tuned + PK Stats) 학습 시작... (피처 145개)
+[B-Fold0] 사용 하이퍼파라미터: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5095592	best: 0.5095592 (0)	total: 109ms	remaining: 5m 25s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7475207976
+bestIteration = 457
+
+Shrink model to first 458 iterations.
+
+[B-Fold0] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold0] 비보정 단독 점수:
+  AUC: 0.7475, Brier: 0.0376, ECE: 0.0045
+  Combined Score: 0.13678
+[B-Fold0] ★보정된 단독★ 최종 점수:
+  AUC: 0.7501, Brier: 0.0370, ECE: 0.0000
+  Combined Score: 0.13421
+
+--- Fold 2/5 학습 시작 ---
+
+[Fold 2] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP) 학습 ---
+
+[A-Fold1] CatBoost (A, Tuned) 학습 시작... (피처 111개)
+[A-Fold1] 사용 하이퍼파라미터: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5640043	best: 0.5640043 (0)	total: 478ms	remaining: 23m 54s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7200435486
+bestIteration = 353
+
+Shrink model to first 354 iterations.
+
+[A-Fold1] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold1] 비보정 단독 점수:
+  AUC: 0.7200, Brier: 0.0202, ECE: 0.0007
+  Combined Score: 0.14520
+[A-Fold1] ★보정된 단독★ 최종 점수:
+  AUC: 0.7224, Brier: 0.0201, ECE: 0.0000
+  Combined Score: 0.14384
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats) 학습 ---
+
+[B-Fold1] CatBoost (B, Tuned + PK Stats) 학습 시작... (피처 145개)
+[B-Fold1] 사용 하이퍼파라미터: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.4949265	best: 0.4949265 (0)	total: 133ms	remaining: 6m 40s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7455901818
+bestIteration = 724
+
+Shrink model to first 725 iterations.
+
+[B-Fold1] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold1] 비보정 단독 점수:
+  AUC: 0.7456, Brier: 0.0376, ECE: 0.0073
+  Combined Score: 0.13843
+[B-Fold1] ★보정된 단독★ 최종 점수:
+  AUC: 0.7481, Brier: 0.0367, ECE: 0.0000
+  Combined Score: 0.13513
+
+--- Fold 3/5 학습 시작 ---
+
+[Fold 3] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP) 학습 ---
+
+[A-Fold2] CatBoost (A, Tuned) 학습 시작... (피처 111개)
+[A-Fold2] 사용 하이퍼파라미터: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5840101	best: 0.5840101 (0)	total: 482ms	remaining: 24m 4s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7232762031
+bestIteration = 404
+
+Shrink model to first 405 iterations.
+
+[A-Fold2] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold2] 비보정 단독 점수:
+  AUC: 0.7233, Brier: 0.0206, ECE: 0.0012
+  Combined Score: 0.14380
+[A-Fold2] ★보정된 단독★ 최종 점수:
+  AUC: 0.7260, Brier: 0.0204, ECE: 0.0000
+  Combined Score: 0.14213
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats) 학습 ---
+
+[B-Fold2] CatBoost (B, Tuned + PK Stats) 학습 시작... (피처 145개)
+[B-Fold2] 사용 하이퍼파라미터: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.4987289	best: 0.4987289 (0)	total: 131ms	remaining: 6m 33s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7420675511
+bestIteration = 218
+
+Shrink model to first 219 iterations.
+
+[B-Fold2] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold2] 비보정 단독 점수:
+  AUC: 0.7421, Brier: 0.0366, ECE: 0.0073
+  Combined Score: 0.13995
+[B-Fold2] ★보정된 단독★ 최종 점수:
+  AUC: 0.7462, Brier: 0.0363, ECE: 0.0000
+  Combined Score: 0.13597
+
+--- Fold 4/5 학습 시작 ---
+
+[Fold 4] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP) 학습 ---
+
+[A-Fold3] CatBoost (A, Tuned) 학습 시작... (피처 111개)
+[A-Fold3] 사용 하이퍼파라미터: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5135148	best: 0.5135148 (0)	total: 331ms	remaining: 16m 32s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7129750279
+bestIteration = 364
+
+Shrink model to first 365 iterations.
+
+[A-Fold3] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold3] 비보정 단독 점수:
+  AUC: 0.7130, Brier: 0.0207, ECE: 0.0009
+  Combined Score: 0.14891
+[A-Fold3] ★보정된 단독★ 최종 점수:
+  AUC: 0.7152, Brier: 0.0206, ECE: 0.0000
+  Combined Score: 0.14755
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats) 학습 ---
+
+[B-Fold3] CatBoost (B, Tuned + PK Stats) 학습 시작... (피처 145개)
+[B-Fold3] 사용 하이퍼파라미터: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5103925	best: 0.5103925 (0)	total: 127ms	remaining: 6m 22s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7373754247
+bestIteration = 473
+
+Shrink model to first 474 iterations.
+
+[B-Fold3] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold3] 비보정 단독 점수:
+  AUC: 0.7374, Brier: 0.0366, ECE: 0.0077
+  Combined Score: 0.14238
+[B-Fold3] ★보정된 단독★ 최종 점수:
+  AUC: 0.7405, Brier: 0.0362, ECE: 0.0000
+  Combined Score: 0.13878
+
+--- Fold 5/5 학습 시작 ---
+
+[Fold 5] K-Fold Target Encoding (PK Stats) 생성...
+
+--- 모델 A (신규 자격, Tuned HP) 학습 ---
+
+[A-Fold4] CatBoost (A, Tuned) 학습 시작... (피처 111개)
+[A-Fold4] 사용 하이퍼파라미터: {'depth': 6, 'learning_rate': 0.07, 'l2_leaf_reg': 3, 'random_strength': 0.5, 'bagging_temperature': 0.5, 'border_count': 128}
+0:	test: 0.5599427	best: 0.5599427 (0)	total: 642ms	remaining: 32m 5s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.708726376
+bestIteration = 237
+
+Shrink model to first 238 iterations.
+
+[A-Fold4] 단독 확률 보정 (Isotonic) 시작...
+[A-Fold4] 비보정 단독 점수:
+  AUC: 0.7087, Brier: 0.0208, ECE: 0.0015
+  Combined Score: 0.15122
+[A-Fold4] ★보정된 단독★ 최종 점수:
+  AUC: 0.7111, Brier: 0.0207, ECE: 0.0000
+  Combined Score: 0.14962
+
+--- 모델 B (자격 유지, Tuned HP + PK Stats) 학습 ---
+
+[B-Fold4] CatBoost (B, Tuned + PK Stats) 학습 시작... (피처 145개)
+[B-Fold4] 사용 하이퍼파라미터: {'depth': 3, 'learning_rate': 0.03, 'l2_leaf_reg': 5, 'random_strength': 3.0, 'bagging_temperature': 1.0, 'border_count': 128}
+0:	test: 0.5066404	best: 0.5066404 (0)	total: 156ms	remaining: 7m 48s
+Stopped by overfitting detector  (100 iterations wait)
+
+bestTest = 0.7440924372
+bestIteration = 607
+
+Shrink model to first 608 iterations.
+
+[B-Fold4] 단독 확률 보정 (Isotonic) 시작...
+[B-Fold4] 비보정 단독 점수:
+  AUC: 0.7441, Brier: 0.0372, ECE: 0.0165
+  Combined Score: 0.14138
+[B-Fold4] ★보정된 단독★ 최종 점수:
+  AUC: 0.7473, Brier: 0.0358, ECE: 0.0000
+  Combined Score: 0.13533
+
+[INFO] K-Fold PK Stats 병합...
+
+[INFO] '최종 보정' CatBoost 모델 10개 및 최종 통계 피처 1개 저장 완료:
+  ./model\pk_stats_final.csv
+Big-Tech ML Engineer v16: 미션 완료. 이 11개의 파일로 `submit.zip`을 재구성하십시오.
