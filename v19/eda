@@ -1,0 +1,217 @@
+import os
+import pandas as pd
+
+BASE_DIR = "./data"
+FEATURE_SAVE_PATH = os.path.join(BASE_DIR, "all_train_data.feather")
+
+# v19 전처리 결과 로드
+all_train_df = pd.read_feather(FEATURE_SAVE_PATH)
+
+# ---- Test 컬럼 안전하게 선택 ----
+if "Test_x" in all_train_df.columns:
+    test_col = "Test_x"
+elif "Test" in all_train_df.columns:
+    test_col = "Test"
+else:
+    raise KeyError("Test/Test_x 컬럼을 찾을 수 없습니다. 전처리 스크립트를 다시 확인해주세요.")
+
+# ---- Age_num 보장 ----
+def convert_age(val):
+    if pd.isna(val):
+        return None
+    s = str(val)
+    base = int(s[:-1])
+    return base if s[-1] == "a" else base + 5
+
+if "Age_num" not in all_train_df.columns:
+    if "Age" not in all_train_df.columns:
+        raise KeyError("Age / Age_num 둘 다 없습니다. 전처리 결과를 확인해주세요.")
+    all_train_df["Age_num"] = all_train_df["Age"].map(convert_age)
+
+# Label NaN 방지
+all_train_df["Label"] = all_train_df["Label"].fillna(0)
+
+# 1) 전체 Age_num 분포 + 사고율
+age_summary_all = (
+    all_train_df
+    .groupby("Age_num")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("Age_num")
+)
+
+# 2) Test=A, B 별로
+age_summary_A = (
+    all_train_df[all_train_df[test_col] == "A"]
+    .groupby("Age_num")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("Age_num")
+)
+
+age_summary_B = (
+    all_train_df[all_train_df[test_col] == "B"]
+    .groupby("Age_num")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("Age_num")
+)
+
+print("[전체] Age_num별 샘플수/사고율")
+print(age_summary_all)
+
+print("\n[A만] Age_num별 샘플수/사고율")
+print(age_summary_A)
+
+print("\n[B만] Age_num별 샘플수/사고율")
+print(age_summary_B)
+
+[전체] Age_num별 샘플수/사고율
+    Age_num       n      risk
+0        20   21303  0.016289
+1        25   41515  0.014188
+2        30   47333  0.012740
+3        35   71463  0.011656
+4        40   81617  0.012448
+5        45   95265  0.016081
+6        50   98475  0.019924
+7        55   91526  0.025414
+8        60   70295  0.058240
+9        65  185077  0.041583
+10       70  114769  0.044934
+11       75   23661  0.043024
+12       80    2398  0.042952
+13       85      70  0.085714
+
+[A만] Age_num별 샘플수/사고율
+    Age_num      n      risk
+0        20  21303  0.016289
+1        25  41515  0.014188
+2        30  47333  0.012740
+3        35  71463  0.011656
+4        40  81617  0.012448
+5        45  95265  0.016081
+...
+1       70  109115  0.044467
+2       75   22612  0.041306
+3       80    2398  0.042952
+4       85      70  0.085714
+
+import pandas as pd
+
+# all_train_df 기준 (v19 전처리 후 feather 로드한 거 사용)
+# YearMonthIndex, Label, Test_x (또는 Test) 가 있다고 가정
+
+df = all_train_df.copy()
+
+# Test 컬럼 이름 정리
+test_col = "Test_x" if "Test_x" in df.columns else "Test"
+
+# 전체
+ym_summary_all = (
+    df
+    .groupby("YearMonthIndex")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("YearMonthIndex")
+)
+print("[전체] YearMonthIndex별 샘플수/사고율")
+print(ym_summary_all.head(30))   # 앞쪽 시점
+print(ym_summary_all.tail(30))   # 뒤쪽 시점
+
+# A만
+ym_summary_A = (
+    df[df[test_col] == "A"]
+    .groupby("YearMonthIndex")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("YearMonthIndex")
+)
+print("\n[A만] YearMonthIndex별 샘플수/사고율")
+print(ym_summary_A.head(30))
+print(ym_summary_A.tail(30))
+
+# B만
+ym_summary_B = (
+    df[df[test_col] == "B"]
+    .groupby("YearMonthIndex")["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values("YearMonthIndex")
+)
+print("\n[B만] YearMonthIndex별 샘플수/사고율")
+print(ym_summary_B.head(30))
+print(ym_summary_B.tail(30))
+
+[전체] YearMonthIndex별 샘플수/사고율
+    YearMonthIndex      n      risk
+0            24194      6  0.166667
+1            24195     37  0.027027
+2            24196     40  0.050000
+3            24197     41  0.024390
+4            24198     46  0.021739
+5            24199    816  0.068627
+6            24200   1115  0.079821
+7            24201    829  0.068758
+8            24202    818  0.075795
+9            24203   1196  0.061037
+10           24204   2492  0.060193
+11           24205    762  0.056430
+12           24206    381  0.068241
+13           24207    641  0.059282
+14           24208    413  0.070218
+15           24209    429  0.058275
+16           24210    468  0.070513
+17           24211    385  0.075325
+18           24212    469  0.070362
+19           24213    415  0.074699
+20           24214    278  0.071942
+21           24215    587  0.083475
+22           24216    627  0.066986
+...
+79           24273   6584  0.040553
+80           24274   6802  0.043958
+81           24275   7602  0.036701
+82           24276   7476  0.039058
+
+# AgeGroup 없는 상태면 먼저 만들어도 됨 (전처리 코드랑 동일하게)
+if "AgeGroup" not in df.columns and "Age_num" in df.columns:
+    df["AgeGroup"] = pd.cut(
+        df["Age_num"],
+        bins=[0, 50, 60, 70, 100],
+        labels=["<50", "50-59", "60-69", "70+"],
+        right=False
+    )
+
+# YearMonthIndex를 대략 구간으로 나눠서 (예: 4분위)
+df["YM_bin"] = pd.qcut(df["YearMonthIndex"], q=4, duplicates="drop")
+
+age_time_summary = (
+    df
+    .groupby(["YM_bin", "AgeGroup"])["Label"]
+    .agg(n="count", risk="mean")
+    .reset_index()
+    .sort_values(["YM_bin", "AgeGroup"])
+)
+
+print("\n[AgeGroup x 시점 구간별 사고율]")
+print(age_time_summary)
+
+[AgeGroup x 시점 구간별 사고율]
+                  YM_bin AgeGroup       n      risk
+0   (24193.999, 24234.0]      <50  119541  0.018103
+1   (24193.999, 24234.0]    50-59   63921  0.032556
+2   (24193.999, 24234.0]    60-69   47093  0.074236
+3   (24193.999, 24234.0]      70+   11473  0.071908
+4     (24234.0, 24248.0]      <50   81350  0.012637
+5     (24234.0, 24248.0]    50-59   45913  0.020430
+6     (24234.0, 24248.0]    60-69   80211  0.046054
+7     (24234.0, 24248.0]      70+   30432  0.047319
+8     (24248.0, 24263.0]      <50   83119  0.010563
+9     (24248.0, 24263.0]    50-59   43238  0.015727
+10    (24248.0, 24263.0]    60-69   70393  0.033412
+11    (24248.0, 24263.0]      70+   47300  0.040211
+12    (24263.0, 24276.0]      <50   74486  0.011412
+13    (24263.0, 24276.0]    50-59   36929  0.015950
+14    (24263.0, 24276.0]    60-69   57675  0.038977
+15    (24263.0, 24276.0]      70+   51693  0.040953
