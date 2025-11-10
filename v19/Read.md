@@ -51,14 +51,14 @@
 
 파이프라인은 크게 두 단계로 나뉩니다.
 
-1. **전처리 스크립트**: `1_Preprocess_delta_logratio.py`
+1. **전처리 스크립트**: `1_Preprocess_v19.py`
    - PDF 명세 + 도메인 지식 기반 Feature Engineering
    - A/B 검사 raw CSV → 도메인 피처 / 요약 인덱스 생성
    - **log_ratio 2차 피처** 추가
    - **PK 히스토리 피처 + Age/YearMonthIndex 정규화 점수 + Delta(B-only)** 생성
    - `./data/all_train_data.feather` 및 `./model/normalization_stats.pkl` 저장
 
-2. **모델 학습 스크립트**: `2_Train_Models_v18_delta_logratio.py` (v19 학습용)
+2. **모델 학습 스크립트**: `2_Train_Models_v19.py` (v19 학습용)
    - `all_train_data.feather` 로드
    - StratifiedKFold(5-fold) 기반 A/B 분리 학습
    - Fold별로 **PK Stats(PrimaryKey level 집계)** 생성 (log_ratio 기반)
@@ -101,7 +101,7 @@
 
 ---
 
-## 3. 1_Preprocess_delta_logratio.py: Feature Engineering
+## 3. 1_Preprocess_v19.py: Feature Engineering
 
 ### 3.1 공통 유틸
 
