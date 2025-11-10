@@ -1,0 +1,443 @@
+## ----------------------------------------------------------------
+## [Jupyter/Script용] 3_Tune_v19.py
+##  - v19 (v18 + Delta + log_ratio) 기준 Optuna HPO 스크립트
+##  - A / B 모델을 나눠서 튜닝 가능
+##    * A: Base + Hist + Norm + log_ratio (PK Stats, Delta 미사용)
+##    * B: Base + PK Stats + Hist + Norm + Delta + log_ratio
+##  - all_train_data.feather 를 사용 (1_Preprocess_delta_logratio.py 출력)
+##  - pip install optuna 필요
+## ----------------------------------------------------------------
+
+import os
+import warnings
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import joblib
+import catboost as cb
+import optuna
+from typing import Optional
+
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score, mean_squared_error
+from sklearn.isotonic import IsotonicRegression
+
+# ------------------------------------------------
+# 0. 경로 및 공통 설정
+# ------------------------------------------------
+BASE_DIR = "./data"
+MODEL_SAVE_DIR = "./model"
+os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
+
+FEATURE_SAVE_PATH = os.path.join(BASE_DIR, "all_train_data.feather")
+
+N_SPLITS = 5
+RANDOM_STATE = 42
+
+# 튜닝에 사용할 폴드
+FOLDS_FOR_TUNING = [0, 1, 2, 3, 4]
+
+CAT_FEATURES = ["Age", "PrimaryKey"]
+DROP_COLS_TRAIN = [
+    "Test_id", "Test_x", "Test_y",
+    "Label", "TestDate", "Year", "Month",
+    "base_index"
+]
+
+# ------------------------------------------------
+# 1. 데이터 로드 & K-Fold 분리 (v19와 동일)
+# ------------------------------------------------
+print("[INFO] v19 Optuna 튜닝용 데이터 로드 중...")
+if not os.path.exists(FEATURE_SAVE_PATH):
+    raise FileNotFoundError(
+        f"all_train_data.feather를 찾을 수 없습니다: {FEATURE_SAVE_PATH}\n"
+        "먼저 1_Preprocess_delta_logratio.py를 실행하세요."
+    )
+
+all_train_df = pd.read_feather(FEATURE_SAVE_PATH)
+all_train_df["Label"] = all_train_df["Label"].fillna(0)
+
+print("[INFO] K-Fold 분리 시작...")
+skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
+train_indices_list = []
+val_indices_list = []
+
+for tr_idx, va_idx in skf.split(all_train_df, all_train_df["Label"]):
+    train_indices_list.append(tr_idx)
+    val_indices_list.append(va_idx)
+
+print(f"[INFO] StratifiedKFold 분리 완료: {N_SPLITS} folds")
+
+# Test 컬럼 식별 (v19와 동일 로직)
+if "Test_x" in all_train_df.columns:
+    TEST_COL = "Test_x"
+elif "Test" in all_train_df.columns:
+    TEST_COL = "Test"
+else:
+    raise KeyError("Test 구분을 위한 'Test' 또는 'Test_x' 컬럼이 필요합니다.")
+
+# ------------------------------------------------
+# 2. Metric 유틸: ECE + Combined Score (v19와 동일)
+# ------------------------------------------------
+def expected_calibration_error(y_true, y_prob, n_bins=10):
+    if len(y_true) == 0 or len(y_prob) == 0:
+        return 0.0
+
+    y_prob = np.nan_to_num(y_prob, nan=0.0)
+    df = pd.DataFrame({"y_true": y_true, "y_prob": y_prob})
+
+    bin_edges = np.linspace(0, 1, n_bins + 1)
+    bin_edges[0] = -0.001
+    bin_edges[-1] = 1.001
+
+    df["y_prob"] = np.clip(df["y_prob"], 0, 1)
+    df["bin"] = pd.cut(df["y_prob"], bins=bin_edges, right=True)
+
+    bin_stats = df.groupby("bin", observed=True).agg(
+        bin_total=("y_prob", "count"),
+        prob_true=("y_true", "mean"),
+        prob_pred=("y_prob", "mean"),
+    )
+
+    non_empty = bin_stats[bin_stats["bin_total"] > 0]
+    if len(non_empty) == 0:
+        return 0.0
+
+    weights = non_empty["bin_total"] / len(y_prob)
+    prob_true = non_empty["prob_true"]
+    prob_pred = non_empty["prob_pred"]
+
+    ece = np.sum(weights * np.abs(prob_true - prob_pred))
+    return ece
+
+
+def combined_score(y_true, y_prob, verbose=False):
+    if (
+        len(y_true) == 0
+        or len(y_prob) == 0
+        or np.sum(y_true) == 0
+        or np.sum(y_true) == len(y_true)
+    ):
+        if verbose:
+            print("  AUC: N/A (단일 클래스), Brier: N/A, ECE: N/A (No data)")
+        return 1.0
+
+    y_prob = np.nan_to_num(y_prob, nan=0.0)
+    auc = roc_auc_score(y_true, y_prob)
+    brier = mean_squared_error(y_true, y_prob)
+    ece = expected_calibration_error(y_true, y_prob)
+
+    score = 0.5 * (1 - auc) + 0.25 * brier + 0.25 * ece
+
+    if verbose:
+        print(f"  AUC: {auc:.4f}, Brier: {brier:.4f}, ECE: {ece:.4f}")
+        print(f"  Combined Score: {score:.5f}")
+
+    return score
+
+# ------------------------------------------------
+# 3. 공통 헬퍼: Delta 컬럼 체크, CatBoost 입력 매트릭스
+# ------------------------------------------------
+def _is_delta_column(col: str) -> bool:
+    return col.startswith("delta_")
+
+
+def _build_cb_matrices(X_train, X_val):
+    """
+    numeric + categorical 분리 및 cat feature 인덱스 계산
+    (A: PK Stats 없이, B: PK Stats merge 후 호출)
+    """
+    numeric_cols = list(set(X_train.columns) - set(CAT_FEATURES) - set(DROP_COLS_TRAIN))
+    common_numeric_cols = list(set(numeric_cols) & set(X_val.columns))
+
+    cb_X_train = X_train[common_numeric_cols + CAT_FEATURES].copy()
+    cb_X_val = X_val[common_numeric_cols + CAT_FEATURES].copy()
+
+    for col in CAT_FEATURES:
+        if col in cb_X_train.columns:
+            cb_X_train[col] = cb_X_train[col].fillna("nan").astype(str)
+            cb_X_val[col] = cb_X_val[col].fillna("nan").astype(str)
+
+    cat_indices = [
+        cb_X_train.columns.get_loc(c) for c in CAT_FEATURES if c in cb_X_train.columns
+    ]
+    return cb_X_train, cb_X_val, cat_indices
+
+# ------------------------------------------------
+# 4. PK Stats 생성 함수 (v19 B 모델용)
+# ------------------------------------------------
+def build_pk_stats_fold(train_df_fold: pd.DataFrame) -> pd.DataFrame:
+    """
+    v19 학습 코드와 동일한 PK Stats 생성
+    (단, train_df_fold 안에서만 aggregation)
+    """
+    agg_funcs = {
+        "Age_num": ["mean", "min", "max"],
+        "YearMonthIndex": ["mean", "std", "min", "max"],
+        "A1_rt_mean": ["mean", "std"],
+        "A4_acc_congruent": ["mean", "std"],
+        "A4_acc_incongruent": ["mean", "std"],
+        # cost → log_ratio
+        "A4_stroop_rt_log_ratio": ["mean", "std"],
+        "RiskScore": ["mean", "std", "max"],
+        "B1_change_acc": ["mean", "std"],
+        "B1_nonchange_acc": ["mean", "std"],
+        "B3_rt_mean": ["mean", "std"],
+        # cost → log_ratio
+        "B4_flanker_acc_log_ratio": ["mean", "std"],
+        "B4_rt_mean": ["mean", "std"],
+        "RiskScore_B": ["mean", "std", "max"],
+        "Test_id": ["count"],
+    }
+    valid_agg_funcs = {
+        col: funcs for col, funcs in agg_funcs.items() if col in train_df_fold.columns
+    }
+
+    pk_stats_fold = train_df_fold.groupby("PrimaryKey").agg(valid_agg_funcs)
+    pk_stats_fold.columns = ["_".join(col).strip() for col in pk_stats_fold.columns.values]
+    pk_stats_fold.rename(columns={"Test_id_count": "pk_test_total_count"}, inplace=True)
+
+    # PK별 A/B 시험 횟수
+    if "Test_x" in train_df_fold.columns:
+        test_col_local = "Test_x"
+    elif "Test" in train_df_fold.columns:
+        test_col_local = "Test"
+    else:
+        raise KeyError("PK Stats 생성을 위해 'Test' 혹은 'Test_x' 컬럼이 필요합니다.")
+
+    pk_test_type_count_fold = (
+        train_df_fold.groupby("PrimaryKey")[test_col_local]
+        .value_counts()
+        .unstack(fill_value=0)
+    )
+    if "A" not in pk_test_type_count_fold.columns:
+        pk_test_type_count_fold["A"] = 0
+    if "B" not in pk_test_type_count_fold.columns:
+        pk_test_type_count_fold["B"] = 0
+
+    pk_test_type_count_fold = pk_test_type_count_fold[["A", "B"]]
+    pk_test_type_count_fold.columns = ["pk_test_A_count", "pk_test_B_count"]
+
+    pk_stats_fold = pk_stats_fold.join(pk_test_type_count_fold, how="left").reset_index()
+    return pk_stats_fold
+
+# ------------------------------------------------
+# 5. A/B별 Optuna Objective
+# ------------------------------------------------
+def objective_A(trial: optuna.Trial) -> float:
+    """
+    v19 A 모델용 Optuna objective
+      - PK Stats 미사용
+      - Delta 피처 명시적으로 제거
+      - log_ratio, Hist, Norm 포함
+    """
+    # 하이퍼파라미터 검색 공간
+    params = {
+        "depth": trial.suggest_int("depth", 4, 8),
+        "learning_rate": trial.suggest_float("learning_rate", 0.02, 0.2, log=True),
+        "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1e-2, 10.0, log=True),
+    }
+
+    cb_params = dict(
+        iterations=3000,
+        loss_function="Logloss",
+        eval_metric="AUC",
+        random_seed=RANDOM_STATE,
+        thread_count=-1,
+        early_stopping_rounds=100,
+        verbose=False,  # 튜닝 시 로그 줄이기
+        **params,
+    )
+
+    all_y_true = []
+    all_y_pred = []
+
+    for fold in FOLDS_FOR_TUNING:
+        train_idx = train_indices_list[fold]
+        val_idx = val_indices_list[fold]
+
+        train_df_fold = all_train_df.iloc[train_idx].copy()
+        val_df_fold = all_train_df.iloc[val_idx].copy()
+
+        # A 데이터만 사용
+        X_train_A = train_df_fold[train_df_fold[TEST_COL] == "A"].copy()
+        X_val_A = val_df_fold[val_df_fold[TEST_COL] == "A"].copy()
+
+        y_train_A = X_train_A["Label"].values
+        y_val_A = X_val_A["Label"].values
+
+        if len(X_train_A) == 0 or len(X_val_A) == 0:
+            continue
+        if len(np.unique(y_train_A)) < 2:
+            continue
+
+        # Delta 피처 제거 (v19 A 규칙)
+        drop_delta_cols = [c for c in X_train_A.columns if _is_delta_column(c)]
+        if drop_delta_cols:
+            X_train_A = X_train_A.drop(columns=drop_delta_cols, errors="ignore")
+            X_val_A = X_val_A.drop(columns=drop_delta_cols, errors="ignore")
+
+        cb_X_train, cb_X_val, cat_indices = _build_cb_matrices(X_train_A, X_val_A)
+
+        model = cb.CatBoostClassifier(**cb_params)
+        model.fit(
+            cb_X_train,
+            y_train_A,
+            eval_set=[(cb_X_val, y_val_A)],
+            cat_features=cat_indices,
+        )
+
+        # Isotonic Calibration
+        pred_uncal = model.predict_proba(cb_X_val)[:, 1]
+        calibrator = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip")
+        calibrator.fit(pred_uncal, y_val_A)
+        pred_cal = calibrator.predict(pred_uncal)
+
+        all_y_true.append(y_val_A)
+        all_y_pred.append(pred_cal)
+
+    if not all_y_true:
+        return 1.0
+
+    y_true = np.concatenate(all_y_true)
+    y_pred = np.concatenate(all_y_pred)
+
+    score = combined_score(y_true, y_pred, verbose=False)
+    return score
+
+
+def objective_B(trial: optuna.Trial) -> float:
+    """
+    v19 B 모델용 Optuna objective
+      - PK Stats + Delta + log_ratio 모두 사용
+    """
+    params = {
+        "depth": trial.suggest_int("depth", 3, 7),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1, log=True),
+        "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1e-2, 10.0, log=True),
+        "random_strength": trial.suggest_float("random_strength", 1e-2, 10.0, log=True),
+        "bagging_temperature": trial.suggest_float(
+            "bagging_temperature", 1e-2, 10.0, log=True
+        ),
+        "border_count": trial.suggest_int("border_count", 64, 255),
+    }
+
+    cb_params = dict(
+        iterations=3000,
+        loss_function="Logloss",
+        eval_metric="AUC",
+        random_seed=RANDOM_STATE,
+        thread_count=-1,
+        early_stopping_rounds=100,
+        verbose=False,
+        **params,
+    )
+
+    all_y_true = []
+    all_y_pred = []
+
+    for fold in FOLDS_FOR_TUNING:
+        train_idx = train_indices_list[fold]
+        val_idx = val_indices_list[fold]
+
+        train_df_fold = all_train_df.iloc[train_idx].copy()
+        val_df_fold = all_train_df.iloc[val_idx].copy()
+
+        # PK Stats (train fold 기준으로만 생성)
+        pk_stats_fold = build_pk_stats_fold(train_df_fold)
+
+        # B 데이터만 사용
+        X_train_B = train_df_fold[train_df_fold[TEST_COL] == "B"].copy()
+        X_val_B = val_df_fold[val_df_fold[TEST_COL] == "B"].copy()
+
+        y_train_B = X_train_B["Label"].values
+        y_val_B = X_val_B["Label"].values
+
+        if len(X_train_B) == 0 or len(X_val_B) == 0:
+            continue
+        if len(np.unique(y_train_B)) < 2:
+            continue
+
+        # PK Stats merge
+        X_train_B = X_train_B.merge(pk_stats_fold, on="PrimaryKey", how="left")
+        X_val_B = X_val_B.merge(pk_stats_fold, on="PrimaryKey", how="left")
+
+        cb_X_train, cb_X_val, cat_indices = _build_cb_matrices(X_train_B, X_val_B)
+
+        model = cb.CatBoostClassifier(**cb_params)
+        model.fit(
+            cb_X_train,
+            y_train_B,
+            eval_set=[(cb_X_val, y_val_B)],
+            cat_features=cat_indices,
+        )
+
+        pred_uncal = model.predict_proba(cb_X_val)[:, 1]
+        calibrator = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip")
+        calibrator.fit(pred_uncal, y_val_B)
+        pred_cal = calibrator.predict(pred_uncal)
+
+        all_y_true.append(y_val_B)
+        all_y_pred.append(pred_cal)
+
+    if not all_y_true:
+        return 1.0
+
+    y_true = np.concatenate(all_y_true)
+    y_pred = np.concatenate(all_y_pred)
+
+    score = combined_score(y_true, y_pred, verbose=False)
+    return score
+
+# ------------------------------------------------
+# 6. 메인: A 혹은 B 튜닝 실행
+# ------------------------------------------------
+def run_optuna_for_group(
+    group: str = "B",
+    n_trials: int = 50,
+    study_name: Optional[str] = None,
+):
+    assert group in ["A", "B"], "group는 'A' 또는 'B'만 가능합니다."
+
+    if study_name is None:
+        study_name = f"v19_{group}_optuna"
+
+    if group == "A":
+        objective = objective_A
+    else:
+        objective = objective_B
+
+    print(f"[INFO] Optuna Study 시작: group={group}, n_trials={n_trials}")
+    study = optuna.create_study(direction="minimize", study_name=study_name)
+    study.optimize(objective, n_trials=n_trials)
+
+    print("\n[RESULT] Optuna 최적 결과")
+    print(f"  group = {group}")
+    print(f"  best_score = {study.best_value:.6f}")
+    print(f"  best_params = {study.best_params}")
+
+    # 결과 저장 (추후 2_Train_Models_v19에서 BEST_*_PARAMS로 반영)
+    save_path = os.path.join(MODEL_SAVE_DIR, f"v19_best_params_{group}_optuna.pkl")
+    joblib.dump(
+        {
+            "group": group,
+            "best_score": study.best_value,
+            "best_params": study.best_params,
+            "study_name": study_name,
+        },
+        save_path,
+    )
+    print(f"[INFO] 최적 파라미터 저장 완료: {save_path}")
+    return study
+
+
+if __name__ == "__main__":
+    # -----------------------------
+    # 여기만 수정해서 돌리면 됨
+    # -----------------------------
+    # group: "A" 또는 "B"
+    TARGET_GROUP = "A"
+    N_TRIALS = 30
+
+    run_optuna_for_group(group=TARGET_GROUP, n_trials=N_TRIALS)
