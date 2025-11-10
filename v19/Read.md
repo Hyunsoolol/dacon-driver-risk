@@ -129,6 +129,10 @@ def masked_operation(cond_series, val_series, target_conds, operation='mean'/'st
 def _log_ratio(num, den, eps=1e-6):
     # 로그 비율: log((num+eps) / (den+eps))
     ...
+```
+
+추가로 A3/B1/B2/B4/B3/B5~B8 정답률 계산용 seq_rate_* 함수들이 있습니다.
+(v18과 동일한 구조)
 
 ### 3.2 A 검사: 1차 도메인 피처 (preprocess\_A)
 
