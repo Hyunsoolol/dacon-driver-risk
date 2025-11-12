@@ -225,4 +225,4 @@ Shrink model to first 718 iterations.
 
 [INFO] '최종 보정' CatBoost 모델 10개 및 최종 PK 통계 피처 저장 완료:
   - PK Stats: ./model\pk_stats_final.csv
-Big-Tech ML Engineer (v20): 미션 완료.
+Big-Tech ML Engineer (v21): 미션 완료.
