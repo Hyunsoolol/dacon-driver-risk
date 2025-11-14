@@ -1,5 +1,5 @@
 ## ----------------------------------------------------------------
-## [Jupyter용] 1_Preprocess_delta_logratio.py
+## [Jupyter용] 1_Preprocess_v18_delta_logratio.py
 ##  - v18 베이스
 ##  - 전략 2: PK 히스토리 피처
 ##  - 전략 3: Age/YearMonthIndex 정규화 점수
